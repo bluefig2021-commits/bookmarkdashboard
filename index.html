@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시작페이지</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text: #e0e0e0;
+      --muted: #a0a0a0;
+      --border: #2a2a2a;
+      --accent: #ffffff;
+      --danger: #ff5555;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 40px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .date-time { font-size: 0.9rem; color: var(--muted); }
+    .clock { font-size: 2.5rem; font-weight: 700; color: var(--accent); }
+    
+    .search-box {
+      margin-bottom: 30px;
+      display: flex;
+      gap: 10px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+    .search-box button {
+      padding: 0 24px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+    .btn-add {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn-add:hover { background: var(--border); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      position: relative;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      outline: none;
+      width: 80%;
+    }
+    .btn-del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .btn-del:hover { color: var(--danger); }
+
+    /* 위젯 내부 요소들 */
+    .bookmark-input {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .bookmark-input input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+    }
+    .bookmark-list { list-style: none; }
+    .bookmark-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #282828;
+    }
+    .bookmark-item a { color: #8ab4f8; text-decoration: none; font-size: 0.95rem; }
+    .bookmark-item a:hover { text-decoration: underline; }
+
+    textarea.note-content {
+      width: 100%;
+      height: 120px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 10px;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div id="date" class="date-time"></div>
+      <div id="clock" class="clock">00:00</div>
+    </div>
+  </header>
+
+  <form class="search-box" action="https://www.google.com/search" method="GET" target="_blank">
+    <input type="text" name="q" placeholder="구글 검색..." required>
+    <button type="submit">검색</button>
+  </form>
+
+  <div class="controls">
+    <button class="btn-add" onclick="addCard('bookmark')">+ 북마크 추가</button>
+    <button class="btn-add" onclick="addCard('note')" style="margin-left: 8px;">+ 메모 추가</button>
+  </div>
+
+  <div id="grid" class="grid"></div>
+
+  <!-- Firebase SDK (v10 모듈) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 사용자 Firebase 설정 정보
+    const firebaseConfig = {
+      apiKey: "AIzaSyAagWKtXuvQOhV-__Mxmd5ys8vs0xDDCUs",
+      authDomain: "water-log132.firebaseapp.com",
+      projectId: "water-log132",
+      storageBucket: "water-log132.firebasestorage.app",
+      messagingSenderId: "569667354916",
+      appId: "1:569667354916:web:f9c9b9a028e81f53f7f3b1",
+      measurementId: "G-YDQ38GTXP3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const cardsCol = collection(db, "startpage_widgets");
+
+    // 실시간 시계
+    function updateClock() {
+      const now = new Date();
+      const options = { month: 'long', day: 'numeric', weekday: 'short' };
+      document.getElementById('date').innerText = now.toLocaleDateString('ko-KR', options);
+      document.getElementById('clock').innerText = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Firestore 데이터 실시간 동기화
+    onSnapshot(cardsCol, (snapshot) => {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      snapshot.docs.forEach(docSnap => {
+        const item = docSnap.data();
+        const id = docSnap.id;
+        grid.appendChild(renderCard(id, item));
+      });
+    });
+
+    // 카드리스트 렌더링
+    function renderCard(id, data) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      
+      let bodyHtml = '';
+      if (data.type === 'bookmark') {
+        const items = data.items || [];
+        bodyHtml = `
+          <div class="bookmark-input">
+            <input type="text" id="url-${id}" placeholder="https://example.com">
+            <button class="btn-add" onclick="addBookmark('${id}')">추가</button>
+          </div>
+          <ul class="bookmark-list">
+            ${items.map((item, idx) => `
+              <li class="bookmark-item">
+                <a href="${item.url}" target="_blank">${item.title}</a>
+                <button class="btn-del" onclick="removeBookmark('${id}',${idx})">✕</button>
+              </li>
+            `).join('')}
+          </ul>
+        `;
+      } else {
+        bodyHtml = `
+          <textarea class="note-content" onchange="updateNote('${id}', this.value)" placeholder="메모를 적어보세요...">${data.content || ''}</textarea>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="card-header">
+          <input class="card-title" value="${data.title}" onchange="updateTitle('${id}', this.value)">
+          <button class="btn-del" onclick="deleteCard('${id}')">✕</button>
+        </div>
+        ${bodyHtml}
+      `;
+      return card;
+    }
+
+    // 전역 함수 등록 (HTML 이벤트용)
+    window.addCard = async (type) => {
+      await addDoc(cardsCol, {
+        type,
+        title: type === 'bookmark' ? '북마크 리스트' : '새 노트',
+        items: [],
+        content: '',
+        createdAt: Date.now()
+      });
+    };
+
+    window.deleteCard = async (id) => {
+      await deleteDoc(doc(db, "startpage_widgets", id));
+    };
+
+    window.updateTitle = async (id, title) => {
+      await updateDoc(doc(db, "startpage_widgets", id), { title });
+    };
+
+    window.updateNote = async (id, content) => {
+      await updateDoc(doc(db, "startpage_widgets", id), { content });
+    };
+
+    window.addBookmark = async (id) => {
+      const input = document.getElementById(`url-${id}`);
+      let url = input.value.trim();
+      if (!url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+
+      let title = url;
+      try {
+        title = new URL(url).hostname.replace('www.', '');
+      } catch (e) {}
+
+      const cardRef = doc(db, "startpage_widgets", id);
+      const snapshot = await cardRef;
+      // 가져온 기존 items에 새로 추가
+      onSnapshot(cardRef, async (docSnap) => {
+        if (docSnap.exists()) {
+          const currentItems = docSnap.data().items || [];
+          await updateDoc(cardRef, { items: [...currentItems, { title, url }] });
+        }
+      }, { onlyOnce: true });
+
+      input.value = '';
+    };
+
+    window.removeBookmark = async (id, idx) => {
+      const cardRef = doc(db, "startpage_widgets", id);
+      onSnapshot(cardRef, async (docSnap) => {
+        if (docSnap.exists()) {
+          const currentItems = docSnap.data().items || [];
+          currentItems.splice(idx, 1);
+          await updateDoc(cardRef, { items: currentItems });
+        }
+      }, { onlyOnce: true });
+    };
+  </script>
+</body>
+</html>
