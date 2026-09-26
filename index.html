@@ -209,13 +209,17 @@
             text-overflow: ellipsis;
         }
 
-        /* 메모 스타일 (스타트미 서식 툴바 탑재) */
+        /* 메모 스타일 (마우스 올릴 때만 툴바 표시) */
         .memo-toolbar {
-            display: flex;
+            display: none;
             gap: 6px;
             flex-wrap: wrap;
-            padding-bottom: 6px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+        .widget-card:hover .memo-toolbar {
+            display: flex;
         }
         .memo-toolbar button, .memo-toolbar input[type="color"] {
             background: rgba(255,255,255,0.1);
@@ -245,7 +249,7 @@
             padding: 4px 0;
         }
 
-        /* 날씨 스타일 (네이버형 상세 정보) */
+        /* 날씨 스타일 */
         .weather-content {
             display: flex;
             flex-direction: column;
@@ -285,7 +289,7 @@
             opacity: 0.85;
         }
 
-        /* 유튜브 스타일 (자동재생/무한반복) */
+        /* 유튜브 스타일 (재생바 제거 및 클릭 방지) */
         .youtube-container {
             position: relative;
             width: 100%;
@@ -293,6 +297,7 @@
             border-radius: 8px;
             overflow: hidden;
             background: #000;
+            pointer-events: none;
         }
         .youtube-container iframe {
             position: absolute;
@@ -300,26 +305,44 @@
             border: none;
         }
 
-        /* 이미지 갤러리 스타일 */
+        /* 갤러리 - 벽에 붙인 포스터 스타일 */
         .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            max-height: 200px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 5px;
+            max-height: 250px;
             overflow-y: auto;
         }
         .gallery-item {
             position: relative;
-            width: 100%;
-            height: 90px;
-            border-radius: 6px;
-            overflow: hidden;
-            background: #222;
+            transition: transform 0.2s ease-out;
         }
         .gallery-item img {
-            width: 100%;
-            height: 100%;
+            display: block;
+            height: 130px;
+            width: auto;
+            border-radius: 2px;
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.4);
             object-fit: cover;
+        }
+        .gallery-item:hover {
+            transform: scale(1.05) rotate(-2deg);
+            z-index: 10;
+        }
+        .gallery-item .widget-delete {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            color: #fff;
+        }
+        .gallery-item:hover .widget-delete {
+            opacity: 1;
         }
 
         /* RSS 피드 스타일 */
@@ -415,10 +438,8 @@
         <button onclick="addWidgetModal('rss')">+ RSS 피드</button>
     </div>
 
-    <!-- 대시보드 위젯 영역 -->
     <div class="dashboard-grid" id="dashboardGrid"></div>
 
-    <!-- 공통 입력 모달 -->
     <div class="modal" id="commonModal">
         <div class="modal-box">
             <h3 id="modalTitle">추가</h3>
@@ -474,7 +495,6 @@
                     card.innerHTML = headerHTML + `
                         <div class="memo-toolbar">
                             <button onclick="formatMemo('bold')"><b>B</b></button>
-                            <button onclick="formatMemo('italic')"><i>I</i></button>
                             <button onclick="formatMemo('underline')"><u>U</u></button>
                             <button onclick="formatMemo('fontSize', '5')">확대</button>
                             <button onclick="formatMemo('fontSize', '3')">기본</button>
@@ -501,10 +521,9 @@
                     `;
                 } 
                 else if (widget.type === 'youtube') {
-                    // 자동재생(autoplay=1), 무한반복(loop=1), 음소거(mute=1) 적용
                     card.innerHTML = headerHTML + `
                         <div class="youtube-container">
-                            <iframe src="https://www.youtube.com/embed/${widget.videoId}?autoplay=1&mute=1&loop=1&playlist=${widget.videoId}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                            <iframe src="https://www.youtube.com/embed/${widget.videoId}?autoplay=1&mute=1&loop=1&controls=0&playlist=${widget.videoId}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                         </div>
                     `;
                 } 
@@ -512,7 +531,7 @@
                     let imagesHTML = (widget.images || []).map((imgUrl, imgIdx) => `
                         <div class="gallery-item">
                             <img src="${imgUrl}" onerror="this.src='https://via.placeholder.com/150'">
-                            <button class="widget-delete" style="position:absolute; top:2px; right:4px; background:rgba(0,0,0,0.6); padding:2px 5px; border-radius:4px;" onclick="deleteGalleryItem(${index}, ${imgIdx})">×</button>
+                            <button class="widget-delete" onclick="deleteGalleryItem(${index}, ${imgIdx})">×</button>
                         </div>
                     `).join('');
                     card.innerHTML = headerHTML + `<div class="gallery-grid">${imagesHTML}</div>`;
@@ -529,7 +548,6 @@
             localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
         }
 
-        // 검색 기능
         function handleSearch(e) {
             if (e.key === 'Enter') performSearch();
         }
@@ -540,7 +558,6 @@
             }
         }
 
-        // 테마 토글
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
@@ -549,18 +566,15 @@
             document.body.classList.add('light-mode');
         }
 
-        // 위젯 타이틀 수정
         function updateWidgetTitle(index, title) {
             widgets[index].title = title;
             localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
         }
 
-        // 메모 서식 적용 툴바 함수
         function formatMemo(command, value = null) {
             document.execCommand(command, false, value);
         }
 
-        // 모달 제어
         function addWidgetModal(type) {
             modalState = { type: type, targetIndex: null };
             document.getElementById('commonModal').classList.add('active');
@@ -643,7 +657,6 @@
             closeModal();
         }
 
-        // RSS 피드 비동기 가져오기
         async function fetchRssFeed(index, rssUrl) {
             try {
                 const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
@@ -657,13 +670,11 @@
             }
         }
 
-        // 메모 업데이트
         function updateMemo(index, htmlContent) {
             widgets[index].content = htmlContent;
             localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
         }
 
-        // 날씨 추가 (GPS 기반 상세 지역명 및 기상청형 데이터)
         function addWeatherWidget() {
             const index = widgets.length;
             widgets.push({ type: 'weather', title: 'WEATHER', locationName: '위치 요청 중', condition: 'GPS 허용 필요' });
@@ -678,7 +689,6 @@
                     const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&accept-language=ko`);
                     const geoData = await geoRes.json();
                     const address = geoData.address;
-                    // 동/구 단위 정밀 추출 (예: 영도구 청학동)
                     const district = address.borough || address.suburb || address.city || '';
                     const neighborhood = address.neighbourhood || address.quarter || address.village || '';
                     const locName = (district + ' ' + neighborhood).trim() || '내 위치';
@@ -722,7 +732,6 @@
             renderWidgets();
         }
 
-        // 초기 실행 시 기존 RSS 자동 갱신
         widgets.forEach((w, idx) => {
             if (w.type === 'rss' && w.feedUrl) {
                 fetchRssFeed(idx, w.feedUrl);
