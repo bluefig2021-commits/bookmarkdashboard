@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archive</title>
+    <title>시작페이지</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -38,7 +38,7 @@
             justify-content: flex-end;
             align-items: center;
             gap: 15px;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         .theme-toggle {
@@ -48,31 +48,57 @@
             padding: 8px 16px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 1px;
+            font-size: 14px;
             backdrop-filter: blur(10px);
+        }
+
+        .search-container {
+            display: flex;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 18px;
+            backdrop-filter: blur(10px);
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+
+        .search-container input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-container button {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .action-buttons {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
             max-width: 1000px;
-            margin: 0 auto 50px auto;
+            margin: 0 auto 40px auto;
         }
 
         .action-buttons button {
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 10px 18px;
+            padding: 8px 14px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            font-size: 13px;
             backdrop-filter: blur(10px);
             transition: background 0.2s;
         }
@@ -81,6 +107,7 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
+        /* 대시보드 그리드 레이아웃 */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -104,6 +131,7 @@
             transition: all 0.3s ease;
         }
 
+        /* 갤러리 무드보드 모드: 하얀색 껍데기, 테두리, 패딩 전면 삭제 */
         .widget-card.gallery-mode {
             background: transparent !important;
             border: none !important;
@@ -123,6 +151,7 @@
             padding-bottom: 8px;
         }
 
+        /* 갤러리 모드 헤더 오버레이 처리 (마우스 오버 시에만 등장) */
         .widget-card.gallery-mode .widget-header {
             position: absolute;
             top: 0;
@@ -162,7 +191,6 @@
             color: var(--text-color);
             font-size: 13px;
             font-weight: bold;
-            letter-spacing: 0.5px;
             outline: none;
             width: 70%;
         }
@@ -185,6 +213,7 @@
             opacity: 1;
         }
 
+        /* 북마크 리스트 */
         .bookmark-list {
             display: flex;
             flex-direction: column;
@@ -239,23 +268,13 @@
             opacity: 1;
         }
 
-        .memo-header-hidden {
-            display: flex;
-            justify-content: flex-end;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            margin-bottom: -10px;
-            z-index: 10;
-        }
-        .widget-card:hover .memo-header-hidden {
-            opacity: 1;
-        }
-
+        /* 메모 스타일 */
         .memo-toolbar {
             display: none;
             gap: 6px;
             flex-wrap: wrap;
             padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
             margin-bottom: 8px;
         }
         .widget-card:hover .memo-toolbar {
@@ -287,9 +306,9 @@
             font-size: 14px;
             overflow-y: auto;
             padding: 4px 0;
-            line-height: 1.5;
         }
 
+        /* 유튜브 스타일 */
         .youtube-container {
             position: relative;
             width: 100%;
@@ -305,6 +324,7 @@
             border: none;
         }
 
+        /* 갤러리 - 껍데기 없이 100% 꽉 채우기 */
         .gallery-grid {
             display: flex;
             flex-direction: column;
@@ -346,6 +366,7 @@
             opacity: 1;
         }
 
+        /* RSS 피드 */
         .rss-list {
             display: flex;
             flex-direction: column;
@@ -368,6 +389,7 @@
             text-decoration: underline;
         }
 
+        /* 모달 팝업 */
         .modal {
             display: none;
             position: fixed;
@@ -412,8 +434,6 @@
             cursor: pointer;
             border: none;
             font-weight: 600;
-            font-size: 12px;
-            letter-spacing: 0.5px;
         }
         .btn-cancel { background: #444; color: #fff; }
         .btn-submit { background: #fff; color: #000; }
@@ -422,31 +442,37 @@
 <body>
 
     <div class="top-bar">
-        <button class="theme-toggle" onclick="toggleTheme()">THEME</button>
+        <button class="theme-toggle" onclick="toggleTheme()">바탕화면 색상</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="구글 검색..." onkeypress="handleSearch(event)">
+        <button onclick="performSearch()">검색</button>
     </div>
 
     <div class="action-buttons">
-        <button onclick="addWidgetModal('bookmark')">+ BOOKMARK</button>
-        <button onclick="addWidgetModal('memo')">+ MEMO</button>
-        <button onclick="addWidgetModal('youtube')">+ YOUTUBE</button>
-        <button onclick="addWidgetModal('gallery')">+ MOODBOARD</button>
-        <button onclick="addWidgetModal('rss')">+ RSS FEED</button>
+        <button onclick="addWidgetModal('bookmark')">+ 북마크 박스</button>
+        <button onclick="addWidgetModal('memo')">+ 메모</button>
+        <button onclick="addWidgetModal('youtube')">+ 유튜브</button>
+        <button onclick="addWidgetModal('gallery')">+ 무드보드 (이미지)</button>
+        <button onclick="addWidgetModal('rss')">+ RSS 피드</button>
     </div>
 
     <div class="dashboard-grid" id="dashboardGrid"></div>
 
     <div class="modal" id="commonModal">
         <div class="modal-box">
-            <h3 id="modalTitle" style="margin: 0 0 5px 0; font-size: 16px; letter-spacing: 1px;">ADD</h3>
-            <input type="text" id="modalInput" placeholder="Enter URL or content">
+            <h3 id="modalTitle">추가</h3>
+            <input type="text" id="modalInput" placeholder="URL 또는 내용을 입력하세요">
             <div class="modal-buttons">
-                <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
-                <button class="btn-submit" onclick="submitModal()">SUBMIT</button>
+                <button class="btn-cancel" onclick="closeModal()">취소</button>
+                <button class="btn-submit" onclick="submitModal()">확인</button>
             </div>
         </div>
     </div>
 
     <script>
+        // 날씨 위젯이 로컬스토리지에 남아있을 경우 렌더링 시 필터링해서 삭제해줌
         let rawWidgets = JSON.parse(localStorage.getItem('dashboard_widgets')) || [];
         let widgets = rawWidgets.filter(w => w.type !== 'weather');
         localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
@@ -463,32 +489,21 @@
                 
                 card.className = isGallery ? 'widget-card gallery-mode' : 'widget-card';
 
-                let headerHTML = '';
+                let headerHTML = `
+                    <div class="widget-header">
+                        <input type="text" class="widget-title-input" value="${widget.title || widget.type.toUpperCase()}" onchange="updateWidgetTitle(${index}, this.value)">
+                        <div class="widget-controls">
+                `;
 
-                // 메모 위젯일 경우 제목과 테두리 싹 날림
-                if (widget.type === 'memo') {
-                    headerHTML = `
-                        <div class="memo-header-hidden">
+                if (widget.type === 'bookmark' || widget.type === 'gallery') {
+                    headerHTML += `<button class="widget-add-sub" onclick="openSubModal(${index})">+</button>`;
+                }
+
+                headerHTML += `
                             <button class="widget-delete" onclick="deleteWidget(${index})">×</button>
                         </div>
-                    `;
-                } else {
-                    headerHTML = `
-                        <div class="widget-header">
-                            <input type="text" class="widget-title-input" value="${widget.title || widget.type.toUpperCase()}" onchange="updateWidgetTitle(${index}, this.value)">
-                            <div class="widget-controls">
-                    `;
-
-                    if (widget.type === 'bookmark' || widget.type === 'gallery') {
-                        headerHTML += `<button class="widget-add-sub" onclick="openSubModal(${index})">+</button>`;
-                    }
-
-                    headerHTML += `
-                                <button class="widget-delete" onclick="deleteWidget(${index})">×</button>
-                            </div>
-                        </div>
-                    `;
-                }
+                    </div>
+                `;
 
                 if (widget.type === 'bookmark') {
                     let itemsHTML = (widget.items || []).map((item, itemIdx) => `
@@ -498,8 +513,8 @@
                                 <span class="bookmark-name">${item.title || item.url}</span>
                             </a>
                             <div class="bookmark-actions">
-                                <button class="action-icon-btn" onclick="editBookmarkTitle(${index}, ${itemIdx})" title="Edit">✏️</button>
-                                <button class="action-icon-btn" onclick="deleteBookmarkItem(${index}, ${itemIdx})" title="Delete">❌</button>
+                                <button class="action-icon-btn" onclick="editBookmarkTitle(${index}, ${itemIdx})" title="이름 수정">✏️</button>
+                                <button class="action-icon-btn" onclick="deleteBookmarkItem(${index}, ${itemIdx})" title="삭제">❌</button>
                             </div>
                         </div>
                     `).join('');
@@ -510,9 +525,9 @@
                         <div class="memo-toolbar">
                             <button onclick="formatMemo('bold')"><b>B</b></button>
                             <button onclick="formatMemo('underline')"><u>U</u></button>
-                            <button onclick="formatMemo('fontSize', '5')">H1</button>
-                            <button onclick="formatMemo('fontSize', '3')">P</button>
-                            <input type="color" onchange="formatMemo('foreColor', this.value)">
+                            <button onclick="formatMemo('fontSize', '5')">확대</button>
+                            <button onclick="formatMemo('fontSize', '3')">기본</button>
+                            <input type="color" onchange="formatMemo('foreColor', this.value)" title="글자 색상">
                         </div>
                         <div class="memo-editable" contenteditable="true" oninput="updateMemo(${index}, this.innerHTML)">${widget.content || ''}</div>
                     `;
@@ -528,7 +543,7 @@
                     let imagesHTML = (widget.images || []).map((imgUrl, imgIdx) => `
                         <div class="gallery-item">
                             <img src="${imgUrl}" onerror="this.src='https://via.placeholder.com/150'">
-                            <button class="widget-delete-img" onclick="deleteGalleryItem(${index}, ${imgIdx})" title="Delete">×</button>
+                            <button class="widget-delete-img" onclick="deleteGalleryItem(${index}, ${imgIdx})" title="사진 삭제">×</button>
                         </div>
                     `).join('');
                     card.innerHTML = headerHTML + `<div class="gallery-grid">${imagesHTML}</div>`;
@@ -536,13 +551,23 @@
                 else if (widget.type === 'rss') {
                     let rssHTML = (widget.items || []).map(item => `
                         <a href="${item.link}" target="_blank" class="rss-item">${item.title}</a>
-                    `).join('') || '<div style="font-size:13px; opacity:0.6;">Loading RSS...</div>';
+                    `).join('') || '<div style="font-size:13px; opacity:0.6;">RSS 로딩 중...</div>';
                     card.innerHTML = headerHTML + `<div class="rss-list">${rssHTML}</div>`;
                 }
 
                 grid.appendChild(card);
             });
             localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
+        }
+
+        function handleSearch(e) {
+            if (e.key === 'Enter') performSearch();
+        }
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            }
         }
 
         function toggleTheme() {
@@ -566,18 +591,18 @@
             modalState = { type: type, targetIndex: null };
             document.getElementById('commonModal').classList.add('active');
             const placeholders = {
-                bookmark: 'URL (e.g. https://...)',
-                youtube: 'YouTube Link or ID',
-                gallery: 'Image URL',
-                rss: 'RSS Feed URL',
+                bookmark: '북마크 URL 입력 (예: https://naver.com)',
+                youtube: '유튜브 링크 또는 비디오 ID 입력',
+                gallery: '이미지 주소(URL) 입력',
+                rss: 'RSS 피드 URL 입력',
                 memo: ''
             };
             document.getElementById('modalInput').value = '';
             document.getElementById('modalInput').placeholder = placeholders[type] || '';
-            document.getElementById('modalTitle').innerText = 'ADD ' + type.toUpperCase();
+            document.getElementById('modalTitle').innerText = type.toUpperCase() + ' 추가';
 
             if (type === 'memo') {
-                widgets.push({ type: 'memo', content: '' });
+                widgets.push({ type: 'memo', title: 'MEMO', content: '' });
                 renderWidgets();
                 closeModal();
             }
@@ -588,8 +613,8 @@
             document.getElementById('commonModal').classList.add('active');
             const widgetType = widgets[index].type;
             document.getElementById('modalInput').value = '';
-            document.getElementById('modalInput').placeholder = widgetType === 'bookmark' ? 'Enter URL' : 'Enter Image URL';
-            document.getElementById('modalTitle').innerText = widgetType === 'bookmark' ? 'ADD BOOKMARK' : 'ADD IMAGE';
+            document.getElementById('modalInput').placeholder = widgetType === 'bookmark' ? '추가할 URL 입력' : '추가할 이미지 URL 입력';
+            document.getElementById('modalTitle').innerText = widgetType === 'bookmark' ? '북마크 항목 추가' : '무드보드 이미지 추가';
         }
 
         function closeModal() {
@@ -610,7 +635,7 @@
                         let fallbackTitle = parsed.hostname.replace('www.', '');
                         widget.items.push({ url: url, title: fallbackTitle });
                         renderWidgets();
-                    } catch(e) { alert('Invalid URL'); return; }
+                    } catch(e) { alert('올바른 URL이 아닙니다.'); return; }
                 } else if (widget.type === 'gallery') {
                     widget.images.push(val);
                     renderWidgets();
@@ -628,7 +653,7 @@
                             items: [{ url: url, title: fallbackTitle }]
                         });
                         renderWidgets();
-                    } catch(e) { alert('Invalid URL'); return; }
+                    } catch(e) { alert('올바른 URL이 아닙니다.'); return; }
                 } else if (modalState.type === 'youtube') {
                     let videoId = val;
                     if (val.includes('youtu.be/')) {
@@ -652,7 +677,7 @@
 
         function editBookmarkTitle(wIdx, iIdx) {
             const currentTitle = widgets[wIdx].items[iIdx].title;
-            const newTitle = prompt('Enter new title:', currentTitle);
+            const newTitle = prompt('새 북마크 제목을 입력하세요:', currentTitle);
             if (newTitle !== null && newTitle.trim() !== '') {
                 widgets[wIdx].items[iIdx].title = newTitle.trim();
                 localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
@@ -669,7 +694,7 @@
                     renderWidgets();
                 }
             } catch (err) {
-                console.error('RSS Load Error');
+                console.error('RSS 로드 실패');
             }
         }
 
