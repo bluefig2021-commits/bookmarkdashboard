@@ -111,10 +111,9 @@
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
+            gap: 20px;
             max-width: 1300px;
             margin: 0 auto;
-            align-items: start;
         }
 
         .widget-card {
@@ -128,42 +127,6 @@
             flex-direction: column;
             gap: 12px;
             min-height: 200px;
-            transition: all 0.3s ease;
-        }
-
-        /* 갤러리 무드보드 모드: 배경, 테두리 완전 삭제 */
-        .widget-card.gallery-mode {
-            background: transparent;
-            border: none;
-            backdrop-filter: none;
-            box-shadow: none;
-            padding: 0;
-            min-height: auto;
-        }
-        
-        .widget-card.gallery-mode .widget-header {
-            position: absolute;
-            top: -40px;
-            left: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 12px;
-            border-radius: 8px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 100;
-            border: none;
-            pointer-events: none;
-        }
-        
-        .widget-card.gallery-mode:hover .widget-header {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .widget-card.gallery-mode .widget-title-input {
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
 
         .widget-header {
@@ -174,10 +137,6 @@
             opacity: 0.7;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
-        }
-
-        .widget-card.gallery-mode .widget-header {
-            border-bottom: none;
         }
 
         .widget-title-input {
@@ -207,23 +166,21 @@
         .widget-add-sub:hover, .widget-delete:hover {
             opacity: 1;
         }
-        .widget-card.gallery-mode .widget-add-sub,
-        .widget-card.gallery-mode .widget-delete {
-            color: #fff;
-        }
 
-        /* 북마크 리스트 */
+        /* 북마크 그룹 스타일 */
         .bookmark-list {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 250px;
+            max-height: 220px;
             overflow-y: auto;
         }
         .bookmark-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            text-decoration: none;
+            color: var(--text-color);
             padding: 6px 8px;
             border-radius: 6px;
             transition: background 0.2s;
@@ -251,23 +208,8 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .bookmark-actions {
-            display: flex;
-            gap: 4px;
-        }
-        .action-icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            opacity: 0.5;
-            transition: opacity 0.2s;
-        }
-        .action-icon-btn:hover {
-            opacity: 1;
-        }
 
-        /* 메모 스타일 */
+        /* 메모 스타일 (마우스 올릴 때만 툴바 표시) */
         .memo-toolbar {
             display: none;
             gap: 6px;
@@ -307,38 +249,47 @@
             padding: 4px 0;
         }
 
-        /* 날씨 위젯 정제 (군더더기 삭제) */
+        /* 날씨 스타일 */
         .weather-content {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 12px;
             flex: 1;
-            justify-content: center;
         }
         .weather-main {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .weather-temp-box {
+            display: flex;
             align-items: baseline;
-            gap: 12px;
+            gap: 4px;
         }
         .weather-temp {
-            font-size: 42px;
-            font-weight: 800;
-            letter-spacing: -1px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .weather-unit {
+            font-size: 18px;
+            opacity: 0.8;
         }
         .weather-desc {
-            font-size: 16px;
-            font-weight: 500;
-            opacity: 0.9;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: right;
         }
         .weather-details {
-            display: flex;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
             font-size: 13px;
-            opacity: 0.6;
-            margin-top: 5px;
+            opacity: 0.85;
         }
 
-        /* 유튜브 스타일 */
+        /* 유튜브 스타일 (재생바 제거 및 클릭 방지) */
         .youtube-container {
             position: relative;
             width: 100%;
@@ -354,12 +305,14 @@
             border: none;
         }
 
-        /* 갤러리 - 진짜 포스터 무드보드 느낌 */
+        /* 갤러리 - 벽에 붙인 포스터 스타일 */
         .gallery-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
-            overflow: visible;
+            gap: 12px;
+            padding: 5px;
+            max-height: 250px;
+            overflow-y: auto;
         }
         .gallery-item {
             position: relative;
@@ -367,14 +320,14 @@
         }
         .gallery-item img {
             display: block;
-            height: 180px;
+            height: 130px;
             width: auto;
-            border-radius: 0; /* 테두리 둥글기 제거, 날것의 종이 느낌 */
-            box-shadow: 3px 5px 12px rgba(0, 0, 0, 0.4);
+            border-radius: 2px;
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.4);
             object-fit: cover;
         }
         .gallery-item:hover {
-            transform: scale(1.05) rotate(1deg);
+            transform: scale(1.05) rotate(-2deg);
             z-index: 10;
         }
         .gallery-item .widget-delete {
@@ -387,13 +340,12 @@
             opacity: 0;
             transition: opacity 0.2s;
             color: #fff;
-            font-weight: bold;
         }
         .gallery-item:hover .widget-delete {
             opacity: 1;
         }
 
-        /* RSS 피드 */
+        /* RSS 피드 스타일 */
         .rss-list {
             display: flex;
             flex-direction: column;
@@ -482,7 +434,7 @@
         <button onclick="addWidgetModal('memo')">+ 메모</button>
         <button onclick="addWeatherWidget()">+ 날씨</button>
         <button onclick="addWidgetModal('youtube')">+ 유튜브</button>
-        <button onclick="addWidgetModal('gallery')">+ 무드보드 (이미지)</button>
+        <button onclick="addWidgetModal('gallery')">+ 이미지 갤러리</button>
         <button onclick="addWidgetModal('rss')">+ RSS 피드</button>
     </div>
 
@@ -509,8 +461,7 @@
 
             widgets.forEach((widget, index) => {
                 const card = document.createElement('div');
-                const isGallery = widget.type === 'gallery';
-                card.className = isGallery ? 'widget-card gallery-mode' : 'widget-card';
+                card.className = 'widget-card';
 
                 let headerHTML = `
                     <div class="widget-header">
@@ -531,14 +482,11 @@
                 if (widget.type === 'bookmark') {
                     let itemsHTML = (widget.items || []).map((item, itemIdx) => `
                         <div class="bookmark-item">
-                            <a href="${item.url}" target="_blank" class="bookmark-info" style="flex:1;" title="${item.url}">
+                            <a href="${item.url}" target="_blank" class="bookmark-info" style="flex:1;">
                                 <img src="https://www.google.com/s2/favicons?domain=${item.url}&sz=32" onerror="this.src='https://via.placeholder.com/20'">
                                 <span class="bookmark-name">${item.title || item.url}</span>
                             </a>
-                            <div class="bookmark-actions">
-                                <button class="action-icon-btn" onclick="editBookmarkTitle(${index}, ${itemIdx})" title="이름 수정">✏️</button>
-                                <button class="action-icon-btn" onclick="deleteBookmarkItem(${index}, ${itemIdx})" title="삭제">❌</button>
-                            </div>
+                            <button class="widget-delete" style="font-size:12px;" onclick="deleteBookmarkItem(${index}, ${itemIdx})">×</button>
                         </div>
                     `).join('');
                     card.innerHTML = headerHTML + `<div class="bookmark-list">${itemsHTML}</div>`;
@@ -559,12 +507,15 @@
                     card.innerHTML = headerHTML + `
                         <div class="weather-content">
                             <div class="weather-main">
-                                <div class="weather-temp">${widget.temp !== undefined ? widget.temp + '°' : '--°'}</div>
-                                <div class="weather-desc">${widget.condition || '위치 확인 중'}</div>
+                                <div class="weather-temp-box">
+                                    <div class="weather-temp">${widget.temp !== undefined ? widget.temp : '--'}</div>
+                                    <div class="weather-unit">°C</div>
+                                </div>
+                                <div class="weather-desc">${widget.condition || '위치 확인 중...'}</div>
                             </div>
                             <div class="weather-details">
-                                <div>체감 <b>${widget.apparentTemp !== undefined ? widget.apparentTemp + '°' : '--'}</b></div>
-                                <div>강수 <b>${widget.precipProb !== undefined ? widget.precipProb + '%' : '--'}</b></div>
+                                <div>체감온도: <b>${widget.apparentTemp !== undefined ? widget.apparentTemp + '°C' : '--'}</b></div>
+                                <div>강수확률: <b>${widget.precipProb !== undefined ? widget.precipProb + '%' : '--'}</b></div>
                             </div>
                         </div>
                     `;
@@ -651,26 +602,11 @@
             const widgetType = widgets[index].type;
             document.getElementById('modalInput').value = '';
             document.getElementById('modalInput').placeholder = widgetType === 'bookmark' ? '추가할 URL 입력' : '추가할 이미지 URL 입력';
-            document.getElementById('modalTitle').innerText = widgetType === 'bookmark' ? '북마크 항목 추가' : '무드보드 이미지 추가';
+            document.getElementById('modalTitle').innerText = widgetType === 'bookmark' ? '북마크 항목 추가' : '갤러리 이미지 추가';
         }
 
         function closeModal() {
             document.getElementById('commonModal').classList.remove('active');
-        }
-
-        // 북마크 제목 자동 파싱 함수 (CORS 우회)
-        async function fetchTitleFromUrl(url, wIdx, iIdx, defaultTitle) {
-            try {
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-                const data = await res.json();
-                const match = data.contents.match(/<title[^>]*>([^<]+)<\/title>/i);
-                const fetchedTitle = match ? match[1].trim() : defaultTitle;
-                widgets[wIdx].items[iIdx].title = fetchedTitle;
-            } catch(e) {
-                widgets[wIdx].items[iIdx].title = defaultTitle;
-            }
-            localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
-            renderWidgets();
         }
 
         async function submitModal() {
@@ -684,15 +620,10 @@
                     if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
                     try {
                         const parsed = new URL(url);
-                        let fallbackTitle = parsed.hostname.replace('www.', '');
-                        const itemIdx = widget.items.length;
-                        widget.items.push({ url: url, title: '제목 불러오는 중...' });
-                        renderWidgets();
-                        fetchTitleFromUrl(url, modalState.targetIndex, itemIdx, fallbackTitle);
+                        widget.items.push({ url: url, title: parsed.hostname.replace('www.', '') });
                     } catch(e) { alert('올바른 URL이 아닙니다.'); return; }
                 } else if (widget.type === 'gallery') {
                     widget.images.push(val);
-                    renderWidgets();
                 }
             } else {
                 if (modalState.type === 'bookmark') {
@@ -700,15 +631,11 @@
                     if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
                     try {
                         const parsed = new URL(url);
-                        let fallbackTitle = parsed.hostname.replace('www.', '');
                         widgets.push({
                             type: 'bookmark',
                             title: 'BOOKMARK',
-                            items: [{ url: url, title: '제목 불러오는 중...' }]
+                            items: [{ url: url, title: parsed.hostname.replace('www.', '') }]
                         });
-                        const wIdx = widgets.length - 1;
-                        renderWidgets();
-                        fetchTitleFromUrl(url, wIdx, 0, fallbackTitle);
                     } catch(e) { alert('올바른 URL이 아닙니다.'); return; }
                 } else if (modalState.type === 'youtube') {
                     let videoId = val;
@@ -718,28 +645,16 @@
                         videoId = val.split('watch?v=')[1].split('&')[0];
                     }
                     widgets.push({ type: 'youtube', title: 'YOUTUBE', videoId: videoId });
-                    renderWidgets();
                 } else if (modalState.type === 'gallery') {
-                    widgets.push({ type: 'gallery', title: 'MOODBOARD', images: [val] });
-                    renderWidgets();
+                    widgets.push({ type: 'gallery', title: 'GALLERY', images: [val] });
                 } else if (modalState.type === 'rss') {
                     widgets.push({ type: 'rss', title: 'RSS FEED', feedUrl: val, items: [] });
                     fetchRssFeed(widgets.length - 1, val);
                 }
             }
 
+            renderWidgets();
             closeModal();
-        }
-
-        // 북마크 제목 커스텀 수정 기능
-        function editBookmarkTitle(wIdx, iIdx) {
-            const currentTitle = widgets[wIdx].items[iIdx].title;
-            const newTitle = prompt('새 북마크 제목을 입력하세요:', currentTitle);
-            if (newTitle !== null && newTitle.trim() !== '') {
-                widgets[wIdx].items[iIdx].title = newTitle.trim();
-                localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
-                renderWidgets();
-            }
         }
 
         async function fetchRssFeed(index, rssUrl) {
@@ -786,7 +701,7 @@
                     let cond = '맑음';
                     if (code >= 1 && code <= 3) cond = '구름 많음';
                     else if (code >= 45 && code <= 48) cond = '안개';
-                    else if (code >= 51 && code <= 67) cond = '비 옴';
+                    else if (code >= 51 && code <= 67) cond = '비 오는 중';
                     else if (code >= 71) cond = '눈';
 
                     widgets[index].title = locName;
