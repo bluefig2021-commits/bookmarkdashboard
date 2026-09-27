@@ -2,26 +2,29 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bookmark Dashboard</title>
   <style>
-    /* 전체 기본 설정 */
+    /* 전체 기본 리셋 */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    
+
     body {
-      background-color: #f4f5f5; /* 화면에 보이는 밝은 회색 배경 */
+      background-color: #f2f2f2;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       padding: 40px;
+      color: #111;
     }
 
-    /* 상단 네비게이션 및 테마 버튼 */
+    /* 상단 헤더 & 버튼 영역 */
     .header {
       position: relative;
       display: flex;
       justify-content: center;
+      align-items: center;
       margin-bottom: 40px;
     }
 
@@ -30,15 +33,23 @@
       gap: 12px;
     }
 
-    .nav-buttons button, .theme-btn {
+    .nav-buttons button,
+    .theme-btn {
       background-color: #ffffff;
-      border: 1px solid #e0e0e0;
-      padding: 10px 16px;
+      border: none;
+      padding: 12px 20px;
       border-radius: 8px;
       font-size: 12px;
-      font-weight: 600;
-      color: #333;
+      font-weight: 700;
+      color: #111;
       cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      transition: transform 0.1s ease;
+    }
+
+    .nav-buttons button:hover,
+    .theme-btn:hover {
+      transform: translateY(-1px);
     }
 
     .theme-btn {
@@ -55,35 +66,36 @@
       align-items: start;
     }
 
-    /* 공통 카드 껍데기 */
+    /* 공통 카드 기본 구조 */
     .card {
       background-color: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
       overflow: hidden;
     }
 
-    /* 텍스트 카드 (네가 원한 상단 밀착 레이아웃) */
+    /* 텍스트/아이콘 카드 (상단 밀착 + 높이 유지) */
     .card.text-card {
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* 텍스트를 위쪽 제목 위치로 바짝 끌어올림 */
-      align-items: flex-start; /* 좌측 정렬 */
-      padding: 30px 24px; /* 어정쩡한 여백 없애고 자연스럽게 떨어지는 상단/좌우 패딩 */
-      min-height: 200px;
+      justify-content: flex-start;
+      align-items: flex-start;
+      padding: 28px;
+      min-height: 280px;
     }
 
     .card-content {
+      font-size: 20px;
       font-weight: 700;
-      font-size: 22px;
       color: #111111;
-      line-height: 1.3;
+      line-height: 1.2;
+      margin: 0;
     }
 
-    /* 이미지 카드 */
+    /* 무드보드 이미지 카드 */
     .card.image-card {
-      min-height: 400px; /* 세로로 긴 이미지 비율 반영 */
-      position: relative;
+      min-height: 420px;
+      display: flex;
     }
 
     .card.image-card img {
@@ -108,21 +120,21 @@
     <button class="theme-btn">THEME</button>
   </header>
 
-  <!-- 메인 그리드 -->
+  <!-- 메인 카드 그리드 -->
   <main class="dashboard-grid">
-    <!-- 아이콘 텍스트 카드 -->
+    <!-- 아이콘 카드 -->
     <div class="card text-card">
       <div class="card-content">⌘</div>
     </div>
 
-    <!-- 일반 텍스트 카드 -->
+    <!-- 텍스트 카드 -->
     <div class="card text-card">
       <div class="card-content">anon</div>
     </div>
 
-    <!-- 핀터레스트 무드보드 느낌의 이미지 카드 -->
+    <!-- 무드보드 이미지 카드 (정상 출력되는 이미지) -->
     <div class="card image-card">
-      <img src="https://via.placeholder.com/400x600" alt="moodboard image">
+      <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=600&auto=format&fit=crop" alt="moodboard image">
     </div>
   </main>
 
