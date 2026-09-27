@@ -308,37 +308,6 @@
             padding: 4px 0;
         }
 
-        /* 날씨 위젯 */
-        .weather-content {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-            justify-content: center;
-        }
-        .weather-main {
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
-        }
-        .weather-temp {
-            font-size: 42px;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-        .weather-desc {
-            font-size: 16px;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-        .weather-details {
-            display: flex;
-            gap: 15px;
-            font-size: 13px;
-            opacity: 0.6;
-            margin-top: 5px;
-        }
-
         /* 유튜브 스타일 */
         .youtube-container {
             position: relative;
@@ -484,7 +453,6 @@
     <div class="action-buttons">
         <button onclick="addWidgetModal('bookmark')">+ 북마크 박스</button>
         <button onclick="addWidgetModal('memo')">+ 메모</button>
-        <button onclick="addWeatherWidget()">+ 날씨</button>
         <button onclick="addWidgetModal('youtube')">+ 유튜브</button>
         <button onclick="addWidgetModal('gallery')">+ 무드보드 (이미지)</button>
         <button onclick="addWidgetModal('rss')">+ RSS 피드</button>
@@ -504,7 +472,11 @@
     </div>
 
     <script>
-        let widgets = JSON.parse(localStorage.getItem('dashboard_widgets')) || [];
+        // 날씨 위젯이 로컬스토리지에 남아있을 경우 렌더링 시 필터링해서 삭제해줌
+        let rawWidgets = JSON.parse(localStorage.getItem('dashboard_widgets')) || [];
+        let widgets = rawWidgets.filter(w => w.type !== 'weather');
+        localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
+
         let modalState = { type: '', targetIndex: null };
 
         function renderWidgets() {
@@ -558,20 +530,6 @@
                             <input type="color" onchange="formatMemo('foreColor', this.value)" title="글자 색상">
                         </div>
                         <div class="memo-editable" contenteditable="true" oninput="updateMemo(${index}, this.innerHTML)">${widget.content || ''}</div>
-                    `;
-                } 
-                else if (widget.type === 'weather') {
-                    card.innerHTML = headerHTML + `
-                        <div class="weather-content">
-                            <div class="weather-main">
-                                <div class="weather-temp">${widget.temp !== undefined ? widget.temp + '°' : '--°'}</div>
-                                <div class="weather-desc">${widget.condition || '위치 확인 중'}</div>
-                            </div>
-                            <div class="weather-details">
-                                <div>체감 <b>${widget.apparentTemp !== undefined ? widget.apparentTemp + '°' : '--'}</b></div>
-                                <div>강수 <b>${widget.precipProb !== undefined ? widget.precipProb + '%' : '--'}</b></div>
-                            </div>
-                        </div>
                     `;
                 } 
                 else if (widget.type === 'youtube') {
@@ -663,22 +621,6 @@
             document.getElementById('commonModal').classList.remove('active');
         }
 
-        async function fetchTitleFromUrl(url, wIdx, iIdx, defaultTitle) {
-            try {
-                const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`);
-                const data = await res.json();
-                if (data.status === 'success' && data.data && data.data.title) {
-                    widgets[wIdx].items[iIdx].title = data.data.title;
-                } else {
-                    widgets[wIdx].items[iIdx].title = defaultTitle;
-                }
-            } catch(e) {
-                widgets[wIdx].items[iIdx].title = defaultTitle;
-            }
-            localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
-            renderWidgets();
-        }
-
         async function submitModal() {
             const val = document.getElementById('modalInput').value.trim();
             if (!val) return;
@@ -691,10 +633,8 @@
                     try {
                         const parsed = new URL(url);
                         let fallbackTitle = parsed.hostname.replace('www.', '');
-                        const itemIdx = widget.items.length;
-                        widget.items.push({ url: url, title: '제목 불러오는 중...' });
+                        widget.items.push({ url: url, title: fallbackTitle });
                         renderWidgets();
-                        fetchTitleFromUrl(url, modalState.targetIndex, itemIdx, fallbackTitle);
                     } catch(e) { alert('올바른 URL이 아닙니다.'); return; }
                 } else if (widget.type === 'gallery') {
                     widget.images.push(val);
@@ -710,11 +650,9 @@
                         widgets.push({
                             type: 'bookmark',
                             title: 'BOOKMARK',
-                            items: [{ url: url, title: '제목 불러오는 중...' }]
+                            items: [{ url: url, title: fallbackTitle }]
                         });
-                        const wIdx = widgets.length - 1;
                         renderWidgets();
-                        fetchTitleFromUrl(url, wIdx, 0, fallbackTitle);
                     } catch(e) { alert('올바른 URL이 아닙니다.'); return; }
                 } else if (modalState.type === 'youtube') {
                     let videoId = val;
@@ -763,48 +701,6 @@
         function updateMemo(index, htmlContent) {
             widgets[index].content = htmlContent;
             localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
-        }
-
-        function addWeatherWidget() {
-            const index = widgets.length;
-            widgets.push({ type: 'weather', title: 'WEATHER', locationName: '위치 요청 중', condition: 'GPS 허용 필요' });
-            renderWidgets();
-
-            if (!navigator.geolocation) return;
-
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                try {
-                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&accept-language=ko`);
-                    const geoData = await geoRes.json();
-                    const address = geoData.address;
-                    const district = address.borough || address.suburb || address.city || '';
-                    const neighborhood = address.neighbourhood || address.quarter || address.village || '';
-                    const locName = (district + ' ' + neighborhood).trim() || '내 위치';
-
-                    const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&daily=precipitation_probability_max&timezone=auto`);
-                    const weatherData = await weatherRes.json();
-
-                    const cur = weatherData.current;
-                    const code = cur.weather_code;
-                    let cond = '맑음';
-                    if (code >= 1 && code <= 3) cond = '구름 많음';
-                    else if (code >= 45 && code <= 48) cond = '안개';
-                    else if (code >= 51 && code <= 67) cond = '비 옴';
-                    else if (code >= 71) cond = '눈';
-
-                    widgets[index].title = locName;
-                    widgets[index].temp = Math.round(cur.temperature_2m);
-                    widgets[index].apparentTemp = Math.round(cur.apparent_temperature);
-                    widgets[index].condition = cond;
-                    widgets[index].precipProb = weatherData.daily.precipitation_probability_max ? weatherData.daily.precipitation_probability_max[0] : 0;
-                    renderWidgets();
-                } catch(e) {
-                    widgets[index].condition = '로드 실패';
-                    renderWidgets();
-                }
-            });
         }
 
         function deleteWidget(index) {
