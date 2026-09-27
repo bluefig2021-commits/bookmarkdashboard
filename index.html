@@ -1,192 +1,705 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bookmark Dashboard</title>
-  <style>
-    /* 전체 기본 리셋 */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --panel-bg: rgba(30, 30, 30, 0.75);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
 
-    body {
-      background-color: #f2f2f2;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 40px;
-      color: #111;
-    }
+        body.light-mode {
+            --bg-color: #f4f4f4;
+            --text-color: #222222;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(0, 0, 0, 0.1);
+        }
 
-    /* 상단 헤더 & 버튼 영역 */
-    .header {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 40px;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    .nav-buttons {
-      display: flex;
-      gap: 12px;
-    }
+        body {
+            margin: 0;
+            padding: 40px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-    .nav-buttons button,
-    .theme-btn {
-      background-color: #ffffff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #111;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-      transition: transform 0.1s ease;
-    }
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
 
-    .nav-buttons button:hover,
-    .theme-btn:hover {
-      transform: translateY(-1px);
-    }
+        .theme-toggle {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px);
+        }
 
-    .theme-btn {
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            max-width: 1000px;
+            margin: 0 auto 50px auto;
+        }
 
-    /* 메인 대시보드 그리드 */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-      align-items: start;
-    }
+        .action-buttons button {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            transition: background 0.2s;
+        }
 
-    /* 공통 카드 기본 구조 */
-    .card {
-      position: relative;
-      background-color: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-      overflow: hidden;
-    }
+        .action-buttons button:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
 
-    /* 카드 우측 상단 수정/삭제 버튼 영역 */
-    .card-actions {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      display: flex;
-      gap: 6px;
-      z-index: 10;
-      opacity: 0.4;
-      transition: opacity 0.2s ease;
-    }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            max-width: 1300px;
+            margin: 0 auto;
+            align-items: start;
+        }
 
-    .card:hover .card-actions {
-      opacity: 1;
-    }
+        .widget-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 18px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 200px;
+            transition: all 0.3s ease;
+        }
 
-    .action-btn {
-      background: #ffffff;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: #333;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-    }
+        .widget-card.gallery-mode {
+            background: transparent !important;
+            border: none !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            min-height: auto;
+        }
 
-    .action-btn:hover {
-      background-color: #111111;
-      color: #ffffff;
-      border-color: #111111;
-    }
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            opacity: 0.7;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
 
-    /* 텍스트/아이콘 카드 (상단 밀착 + 세로 높이 보정) */
-    .card.text-card {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: flex-start;
-      padding: 28px;
-      min-height: 280px;
-    }
+        .widget-card.gallery-mode .widget-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+            padding: 12px 16px 24px 16px;
+            border-bottom: none;
+            border-radius: 14px 14px 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+        
+        .widget-card.gallery-mode:hover .widget-header {
+            opacity: 1;
+        }
 
-    .card-content {
-      font-size: 20px;
-      font-weight: 700;
-      color: #111111;
-      line-height: 1.2;
-      margin: 0;
-    }
+        .widget-card.gallery-mode .widget-title-input {
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
 
-    /* 무드보드 이미지 카드 */
-    .card.image-card {
-      min-height: 420px;
-      display: flex;
-    }
+        .widget-card.gallery-mode .widget-add-sub,
+        .widget-card.gallery-mode .widget-delete {
+            color: #fff;
+            opacity: 0.8;
+        }
+        .widget-card.gallery-mode .widget-add-sub:hover,
+        .widget-card.gallery-mode .widget-delete:hover {
+            opacity: 1;
+        }
 
-    .card.image-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-  </style>
+        .widget-title-input {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            outline: none;
+            width: 70%;
+        }
+
+        .widget-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .widget-add-sub, .widget-delete {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            opacity: 0.6;
+            font-size: 14px;
+        }
+        .widget-add-sub:hover, .widget-delete:hover {
+            opacity: 1;
+        }
+
+        .bookmark-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .bookmark-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .bookmark-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .bookmark-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        .bookmark-info img {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .bookmark-name {
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bookmark-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .action-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .action-icon-btn:hover {
+            opacity: 1;
+        }
+
+        .memo-header-hidden {
+            display: flex;
+            justify-content: flex-end;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            margin-bottom: -10px;
+            z-index: 10;
+        }
+        .widget-card:hover .memo-header-hidden {
+            opacity: 1;
+        }
+
+        .memo-toolbar {
+            display: none;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        .widget-card:hover .memo-toolbar {
+            display: flex;
+        }
+        .memo-toolbar button, .memo-toolbar input[type="color"] {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .memo-toolbar input[type="color"] {
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+        }
+        .memo-editable {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            width: 100%;
+            height: 140px;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+            overflow-y: auto;
+            padding: 4px 0;
+            line-height: 1.5;
+        }
+
+        .youtube-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            pointer-events: none;
+        }
+        .youtube-container iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: none;
+        }
+
+        .gallery-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+        .gallery-item {
+            position: relative;
+            width: 100%;
+        }
+        .gallery-item img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            object-fit: cover;
+        }
+        .gallery-item .widget-delete-img {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            color: #fff;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .gallery-item:hover .widget-delete-img {
+            opacity: 1;
+        }
+
+        .rss-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .rss-item {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 13px;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rss-item:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-box {
+            background: #1e1e1e;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 14px;
+            width: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            color: #fff;
+        }
+        .modal-box input {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+            font-size: 14px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .modal-buttons button {
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        .btn-cancel { background: #444; color: #fff; }
+        .btn-submit { background: #fff; color: #000; }
+    </style>
 </head>
 <body>
 
-  <!-- 상단 헤더 -->
-  <header class="header">
-    <div class="nav-buttons">
-      <button>+ BOOKMARK</button>
-      <button>+ MEMO</button>
-      <button>+ YOUTUBE</button>
-      <button>+ MOODBOARD</button>
-      <button>+ RSS FEED</button>
-    </div>
-    <button class="theme-btn">THEME</button>
-  </header>
-
-  <!-- 메인 카드 그리드 -->
-  <main class="dashboard-grid">
-    <!-- 아이콘 카드 -->
-    <div class="card text-card">
-      <div class="card-actions">
-        <button class="action-btn" title="수정">✎</button>
-        <button class="action-btn" title="삭제">✕</button>
-      </div>
-      <div class="card-content">⌘</div>
+    <div class="top-bar">
+        <button class="theme-toggle" onclick="toggleTheme()">THEME</button>
     </div>
 
-    <!-- 텍스트 카드 -->
-    <div class="card text-card">
-      <div class="card-actions">
-        <button class="action-btn" title="수정">✎</button>
-        <button class="action-btn" title="삭제">✕</button>
-      </div>
-      <div class="card-content">anon</div>
+    <div class="action-buttons">
+        <button onclick="addWidgetModal('bookmark')">+ BOOKMARK</button>
+        <button onclick="addWidgetModal('memo')">+ MEMO</button>
+        <button onclick="addWidgetModal('youtube')">+ YOUTUBE</button>
+        <button onclick="addWidgetModal('gallery')">+ MOODBOARD</button>
+        <button onclick="addWidgetModal('rss')">+ RSS FEED</button>
     </div>
 
-    <!-- 무드보드 이미지 카드 -->
-    <div class="card image-card">
-      <div class="card-actions">
-        <button class="action-btn" title="수정">✎</button>
-        <button class="action-btn" title="삭제">✕</button>
-      </div>
-      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'><rect width='100%' height='100%' fill='%23222222'/><text x='50%' y='50%' fill='%23ffffff' font-size='18' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle'>MOODBOARD IMAGE</text></svg>" alt="moodboard image">
-    </div>
-  </main>
+    <div class="dashboard-grid" id="dashboardGrid"></div>
 
+    <div class="modal" id="commonModal">
+        <div class="modal-box">
+            <h3 id="modalTitle" style="margin: 0 0 5px 0; font-size: 16px; letter-spacing: 1px;">ADD</h3>
+            <input type="text" id="modalInput" placeholder="Enter URL or content">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
+                <button class="btn-submit" onclick="submitModal()">SUBMIT</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rawWidgets = JSON.parse(localStorage.getItem('dashboard_widgets')) || [];
+        let widgets = rawWidgets.filter(w => w.type !== 'weather');
+        localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
+
+        let modalState = { type: '', targetIndex: null };
+
+        function renderWidgets() {
+            const grid = document.getElementById('dashboardGrid');
+            grid.innerHTML = '';
+
+            widgets.forEach((widget, index) => {
+                const card = document.createElement('div');
+                const isGallery = widget.type === 'gallery';
+                
+                card.className = isGallery ? 'widget-card gallery-mode' : 'widget-card';
+
+                let headerHTML = '';
+
+                // 메모 위젯일 경우 제목과 테두리 싹 날림
+                if (widget.type === 'memo') {
+                    headerHTML = `
+                        <div class="memo-header-hidden">
+                            <button class="widget-delete" onclick="deleteWidget(${index})">×</button>
+                        </div>
+                    `;
+                } else {
+                    headerHTML = `
+                        <div class="widget-header">
+                            <input type="text" class="widget-title-input" value="${widget.title || widget.type.toUpperCase()}" onchange="updateWidgetTitle(${index}, this.value)">
+                            <div class="widget-controls">
+                    `;
+
+                    if (widget.type === 'bookmark' || widget.type === 'gallery') {
+                        headerHTML += `<button class="widget-add-sub" onclick="openSubModal(${index})">+</button>`;
+                    }
+
+                    headerHTML += `
+                                <button class="widget-delete" onclick="deleteWidget(${index})">×</button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (widget.type === 'bookmark') {
+                    let itemsHTML = (widget.items || []).map((item, itemIdx) => `
+                        <div class="bookmark-item">
+                            <a href="${item.url}" target="_blank" class="bookmark-info" style="flex:1;" title="${item.url}">
+                                <img src="https://www.google.com/s2/favicons?domain=${item.url}&sz=32" onerror="this.src='https://via.placeholder.com/20'">
+                                <span class="bookmark-name">${item.title || item.url}</span>
+                            </a>
+                            <div class="bookmark-actions">
+                                <button class="action-icon-btn" onclick="editBookmarkTitle(${index}, ${itemIdx})" title="Edit">✏️</button>
+                                <button class="action-icon-btn" onclick="deleteBookmarkItem(${index}, ${itemIdx})" title="Delete">❌</button>
+                            </div>
+                        </div>
+                    `).join('');
+                    card.innerHTML = headerHTML + `<div class="bookmark-list">${itemsHTML}</div>`;
+                } 
+                else if (widget.type === 'memo') {
+                    card.innerHTML = headerHTML + `
+                        <div class="memo-toolbar">
+                            <button onclick="formatMemo('bold')"><b>B</b></button>
+                            <button onclick="formatMemo('underline')"><u>U</u></button>
+                            <button onclick="formatMemo('fontSize', '5')">H1</button>
+                            <button onclick="formatMemo('fontSize', '3')">P</button>
+                            <input type="color" onchange="formatMemo('foreColor', this.value)">
+                        </div>
+                        <div class="memo-editable" contenteditable="true" oninput="updateMemo(${index}, this.innerHTML)">${widget.content || ''}</div>
+                    `;
+                } 
+                else if (widget.type === 'youtube') {
+                    card.innerHTML = headerHTML + `
+                        <div class="youtube-container">
+                            <iframe src="https://www.youtube.com/embed/${widget.videoId}?autoplay=1&mute=1&loop=1&controls=0&playlist=${widget.videoId}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } 
+                else if (widget.type === 'gallery') {
+                    let imagesHTML = (widget.images || []).map((imgUrl, imgIdx) => `
+                        <div class="gallery-item">
+                            <img src="${imgUrl}" onerror="this.src='https://via.placeholder.com/150'">
+                            <button class="widget-delete-img" onclick="deleteGalleryItem(${index}, ${imgIdx})" title="Delete">×</button>
+                        </div>
+                    `).join('');
+                    card.innerHTML = headerHTML + `<div class="gallery-grid">${imagesHTML}</div>`;
+                } 
+                else if (widget.type === 'rss') {
+                    let rssHTML = (widget.items || []).map(item => `
+                        <a href="${item.link}" target="_blank" class="rss-item">${item.title}</a>
+                    `).join('') || '<div style="font-size:13px; opacity:0.6;">Loading RSS...</div>';
+                    card.innerHTML = headerHTML + `<div class="rss-list">${rssHTML}</div>`;
+                }
+
+                grid.appendChild(card);
+            });
+            localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        function updateWidgetTitle(index, title) {
+            widgets[index].title = title;
+            localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
+        }
+
+        function formatMemo(command, value = null) {
+            document.execCommand(command, false, value);
+        }
+
+        function addWidgetModal(type) {
+            modalState = { type: type, targetIndex: null };
+            document.getElementById('commonModal').classList.add('active');
+            const placeholders = {
+                bookmark: 'URL (e.g. https://...)',
+                youtube: 'YouTube Link or ID',
+                gallery: 'Image URL',
+                rss: 'RSS Feed URL',
+                memo: ''
+            };
+            document.getElementById('modalInput').value = '';
+            document.getElementById('modalInput').placeholder = placeholders[type] || '';
+            document.getElementById('modalTitle').innerText = 'ADD ' + type.toUpperCase();
+
+            if (type === 'memo') {
+                widgets.push({ type: 'memo', content: '' });
+                renderWidgets();
+                closeModal();
+            }
+        }
+
+        function openSubModal(index) {
+            modalState = { type: 'sub_add', targetIndex: index };
+            document.getElementById('commonModal').classList.add('active');
+            const widgetType = widgets[index].type;
+            document.getElementById('modalInput').value = '';
+            document.getElementById('modalInput').placeholder = widgetType === 'bookmark' ? 'Enter URL' : 'Enter Image URL';
+            document.getElementById('modalTitle').innerText = widgetType === 'bookmark' ? 'ADD BOOKMARK' : 'ADD IMAGE';
+        }
+
+        function closeModal() {
+            document.getElementById('commonModal').classList.remove('active');
+        }
+
+        async function submitModal() {
+            const val = document.getElementById('modalInput').value.trim();
+            if (!val) return;
+
+            if (modalState.targetIndex !== null) {
+                const widget = widgets[modalState.targetIndex];
+                if (widget.type === 'bookmark') {
+                    let url = val;
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+                    try {
+                        const parsed = new URL(url);
+                        let fallbackTitle = parsed.hostname.replace('www.', '');
+                        widget.items.push({ url: url, title: fallbackTitle });
+                        renderWidgets();
+                    } catch(e) { alert('Invalid URL'); return; }
+                } else if (widget.type === 'gallery') {
+                    widget.images.push(val);
+                    renderWidgets();
+                }
+            } else {
+                if (modalState.type === 'bookmark') {
+                    let url = val;
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+                    try {
+                        const parsed = new URL(url);
+                        let fallbackTitle = parsed.hostname.replace('www.', '');
+                        widgets.push({
+                            type: 'bookmark',
+                            title: 'BOOKMARK',
+                            items: [{ url: url, title: fallbackTitle }]
+                        });
+                        renderWidgets();
+                    } catch(e) { alert('Invalid URL'); return; }
+                } else if (modalState.type === 'youtube') {
+                    let videoId = val;
+                    if (val.includes('youtu.be/')) {
+                        videoId = val.split('youtu.be/')[1].split('?')[0];
+                    } else if (val.includes('watch?v=')) {
+                        videoId = val.split('watch?v=')[1].split('&')[0];
+                    }
+                    widgets.push({ type: 'youtube', title: 'YOUTUBE', videoId: videoId });
+                    renderWidgets();
+                } else if (modalState.type === 'gallery') {
+                    widgets.push({ type: 'gallery', title: 'MOODBOARD', images: [val] });
+                    renderWidgets();
+                } else if (modalState.type === 'rss') {
+                    widgets.push({ type: 'rss', title: 'RSS FEED', feedUrl: val, items: [] });
+                    fetchRssFeed(widgets.length - 1, val);
+                }
+            }
+
+            closeModal();
+        }
+
+        function editBookmarkTitle(wIdx, iIdx) {
+            const currentTitle = widgets[wIdx].items[iIdx].title;
+            const newTitle = prompt('Enter new title:', currentTitle);
+            if (newTitle !== null && newTitle.trim() !== '') {
+                widgets[wIdx].items[iIdx].title = newTitle.trim();
+                localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
+                renderWidgets();
+            }
+        }
+
+        async function fetchRssFeed(index, rssUrl) {
+            try {
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    widgets[index].items = data.items.map(item => ({ title: item.title, link: item.link }));
+                    renderWidgets();
+                }
+            } catch (err) {
+                console.error('RSS Load Error');
+            }
+        }
+
+        function updateMemo(index, htmlContent) {
+            widgets[index].content = htmlContent;
+            localStorage.setItem('dashboard_widgets', JSON.stringify(widgets));
+        }
+
+        function deleteWidget(index) {
+            widgets.splice(index, 1);
+            renderWidgets();
+        }
+
+        function deleteBookmarkItem(widgetIdx, itemIdx) {
+            widgets[widgetIdx].items.splice(itemIdx, 1);
+            renderWidgets();
+        }
+
+        function deleteGalleryItem(widgetIdx, imgIdx) {
+            widgets[widgetIdx].images.splice(imgIdx, 1);
+            renderWidgets();
+        }
+
+        widgets.forEach((w, idx) => {
+            if (w.type === 'rss' && w.feedUrl) {
+                fetchRssFeed(idx, w.feedUrl);
+            }
+        });
+
+        renderWidgets();
+    </script>
 </body>
 </html>
