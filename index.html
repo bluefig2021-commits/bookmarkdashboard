@@ -350,6 +350,32 @@
         .vault-main-actions .right { display:flex; gap:8px; }
         @media(max-width:600px){ .modal-box.wide{max-height:94vh;padding:16px;} .vault-stat-grid{grid-template-columns:repeat(3,1fr);} }
 
+
+        /* 멤버십·구독 해지 관리 */
+        .renewal-panel { max-width: 1200px; margin: 0 auto 22px; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:14px; padding:16px; }
+        .renewal-head { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+        .renewal-head h2 { font-size:16px; margin:0; }
+        .renewal-sub { font-size:12px; opacity:.65; margin-top:4px; }
+        .renewal-summary { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 12px; }
+        .renewal-pill { background:var(--btn-bg); border-radius:8px; padding:7px 10px; font-size:12px; }
+        .renewal-pill strong { font-size:16px; margin-right:4px; }
+        .renewal-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:9px; }
+        .renewal-card { border:1px solid var(--border-color); border-radius:10px; padding:11px; min-width:0; }
+        .renewal-card.overdue { border-color:var(--danger); }
+        .renewal-card.soon { border-color:#d49a32; }
+        .renewal-card h3 { margin:0 0 6px; font-size:14px; }
+        .renewal-meta { font-size:12px; line-height:1.65; opacity:.8; overflow-wrap:anywhere; }
+        .renewal-actions { display:flex; gap:6px; margin-top:9px; flex-wrap:wrap; }
+        .renewal-actions button, .renewal-head button { border:1px solid var(--border-color); border-radius:7px; padding:6px 9px; background:var(--btn-bg); color:var(--text-color); cursor:pointer; font-size:12px; }
+        .renewal-actions button.danger { color:var(--danger); }
+        .renewal-empty { font-size:13px; opacity:.6; padding:12px 2px; }
+        .renewal-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .renewal-form-grid label { display:flex; flex-direction:column; gap:5px; font-size:12px; opacity:.85; }
+        .renewal-form-grid input, .renewal-form-grid select, .renewal-form-grid textarea { width:100%; padding:9px; border:1px solid var(--border-color); border-radius:7px; background:var(--panel-bg); color:var(--text-color); font:inherit; }
+        .renewal-form-grid .full { grid-column:1/-1; }
+        .renewal-note { font-size:11px; opacity:.65; line-height:1.5; margin-top:10px; }
+        @media(max-width:600px){ .renewal-form-grid{grid-template-columns:1fr;} .renewal-form-grid .full{grid-column:auto;} }
+
         #toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: var(--panel-bg); border: 1px solid var(--border-color);
@@ -388,6 +414,17 @@
             <label for="fileImport">백업/파일 가져오기</label>
             <input id="fileImport" type="file" accept=".json,application/json,.html,.htm,.txt,.xml" hidden>
         </div>
+
+
+        <section class="renewal-panel" aria-label="멤버십 및 구독 해지 관리">
+          <div class="renewal-head">
+            <div><h2>해지·갱신 관리</h2><div class="renewal-sub">무료체험 종료, 멤버십 갱신, 자동결제 예정일을 놓치지 않도록 따로 관리해.</div></div>
+            <button type="button" onclick="openRenewalForm()">+ 해지 일정 추가</button>
+          </div>
+          <div class="renewal-summary" id="renewalSummary"></div>
+          <div class="renewal-list" id="renewalList"></div>
+          <div class="renewal-note">※ 이 기능은 일정과 알림을 관리하는 기능이야. 실제 구독 해지는 각 서비스에서 직접 해야 해. 브라우저를 닫아둔 동안에는 알림이 실행되지 않으므로 중요한 일정은 휴대폰 캘린더에도 등록해 둬.</div>
+        </section>
 
         <div class="dashboard-grid" id="dashboardGrid"></div>
     </div>
@@ -437,6 +474,25 @@
       </div>
     </div>
 
+
+    <div class="modal" id="renewalModal">
+      <div class="modal-box wide">
+        <div class="vault-head"><div><h3 id="renewalModalTitle">해지·갱신 일정 추가</h3><p>결제일보다 해지 마감일을 먼저 챙기는 게 중요해.</p></div><button class="btn-cancel" onclick="closeRenewalForm()">닫기</button></div>
+        <div class="renewal-form-grid">
+          <label>서비스·멤버십 이름<input id="renewalName" placeholder="예: OTT 멤버십, 쇼핑 멤버십"></label>
+          <label>상태<select id="renewalStatus"><option value="해지 예정">해지 예정</option><option value="유지">유지</option><option value="해지 완료">해지 완료</option></select></label>
+          <label>해지해야 하는 날짜<input id="renewalDeadline" type="date"></label>
+          <label>다음 결제·갱신 날짜<input id="renewalBilling" type="date"></label>
+          <label>예상 결제 금액<input id="renewalCost" placeholder="예: 4,990원"></label>
+          <label>알림 시점<select id="renewalAlert"><option value="7">7일 전</option><option value="3" selected>3일 전</option><option value="1">하루 전</option><option value="0">당일</option></select></label>
+          <label class="full">해지 페이지 주소<input id="renewalUrl" type="url" placeholder="https://..."></label>
+          <label class="full">메모<textarea id="renewalMemo" rows="2" placeholder="무료체험 시작일, 해지 방법, 고객센터 등"></textarea></label>
+        </div>
+        <div class="renewal-note">해지 마감일을 모르면 비워둘 수 있지만, 결제일은 가능하면 입력해. 서비스마다 해지 후 이용 종료 시점이 다를 수 있으니 약관도 확인해야 해.</div>
+        <div class="modal-buttons"><button class="btn-cancel" onclick="closeRenewalForm()">취소</button><button class="btn-submit" onclick="saveRenewal()">저장</button></div>
+      </div>
+    </div>
+
     <div id="toast" role="status"></div>
 
     <script>
@@ -469,6 +525,123 @@
             t.textContent = msg; t.style.display = 'block';
             clearTimeout(toastTimer);
             toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3500);
+        }
+
+
+        /* ---------- 멤버십·구독 해지 일정 ---------- */
+        const RENEWAL_KEY = 'membership_renewal_tracker_v1';
+        let renewalItems = loadRenewals();
+        let editingRenewalId = null;
+
+        function loadRenewals() {
+            try {
+                const value = JSON.parse(localStorage.getItem(RENEWAL_KEY) || '[]');
+                return Array.isArray(value) ? value : [];
+            } catch { return []; }
+        }
+        function saveRenewalsToStorage() {
+            localStorage.setItem(RENEWAL_KEY, JSON.stringify(renewalItems));
+            renderRenewals();
+        }
+        function dateDiff(dateString) {
+            if (!dateString) return null;
+            const today = new Date(); today.setHours(0,0,0,0);
+            const target = new Date(dateString + 'T00:00:00');
+            return Math.round((target - today) / 86400000);
+        }
+        function renderRenewals() {
+            const list = $('renewalList'), summary = $('renewalSummary');
+            if (!list || !summary) return;
+            const active = renewalItems.filter(x => x.status !== '해지 완료');
+            const urgent = active.filter(x => {
+                const d = dateDiff(x.deadline || x.billing);
+                return d !== null && d <= 3;
+            });
+            const upcoming = active.filter(x => {
+                const d = dateDiff(x.deadline || x.billing);
+                return d !== null && d >= 0 && d <= 7;
+            });
+            summary.innerHTML = `<span class="renewal-pill"><strong>${active.length}</strong> 진행 중</span><span class="renewal-pill"><strong>${urgent.length}</strong> 3일 이내 확인</span><span class="renewal-pill"><strong>${upcoming.length}</strong> 7일 이내 일정</span>`;
+            if (!renewalItems.length) {
+                list.innerHTML = '<div class="renewal-empty">아직 등록된 일정이 없어. 무료체험이나 멤버십을 시작하면 바로 등록해 둬.</div>';
+                return;
+            }
+            const sorted = [...renewalItems].sort((a,b) => {
+                const da = dateDiff(a.deadline || a.billing), db = dateDiff(b.deadline || b.billing);
+                return (da ?? 99999) - (db ?? 99999);
+            });
+            list.innerHTML = sorted.map(item => {
+                const d = dateDiff(item.deadline || item.billing);
+                const dateLabel = item.deadline ? `해지 마감 ${item.deadline}` : (item.billing ? `다음 결제 ${item.billing}` : '날짜 미입력');
+                const urgency = item.status === '해지 완료' ? '완료' : d === null ? '날짜 확인 필요' : d < 0 ? `${Math.abs(d)}일 지남 · 확인 필요` : d === 0 ? '오늘 확인' : `${d}일 남음`;
+                const cls = item.status !== '해지 완료' && d !== null && d < 0 ? 'overdue' : item.status !== '해지 완료' && d !== null && d <= 3 ? 'soon' : '';
+                return `<article class="renewal-card ${cls}">
+                  <h3>${esc(item.name)}</h3>
+                  <div class="renewal-meta"><b>${esc(urgency)}</b><br>${esc(dateLabel)}<br>${item.billing ? `결제 예정 ${esc(item.billing)}<br>` : ''}${item.cost ? `예상 금액 ${esc(item.cost)}<br>` : ''}상태 ${esc(item.status || '해지 예정')}${item.memo ? `<br>${esc(item.memo)}` : ''}</div>
+                  <div class="renewal-actions">${item.url ? `<button onclick="openRenewalUrl('${esc(item.id)}')">해지 페이지</button>` : ''}<button onclick="editRenewal('${esc(item.id)}')">수정</button><button onclick="completeRenewal('${esc(item.id)}')">해지 완료</button><button class="danger" onclick="deleteRenewal('${esc(item.id)}')">삭제</button></div>
+                </article>`;
+            }).join('');
+        }
+        function openRenewalForm(id = null) {
+            editingRenewalId = id;
+            const item = id ? renewalItems.find(x => x.id === id) : null;
+            $('renewalModalTitle').textContent = item ? '해지·갱신 일정 수정' : '해지·갱신 일정 추가';
+            $('renewalName').value = item?.name || '';
+            $('renewalStatus').value = item?.status || '해지 예정';
+            $('renewalDeadline').value = item?.deadline || '';
+            $('renewalBilling').value = item?.billing || '';
+            $('renewalCost').value = item?.cost || '';
+            $('renewalAlert').value = String(item?.alert ?? 3);
+            $('renewalUrl').value = item?.url || '';
+            $('renewalMemo').value = item?.memo || '';
+            $('renewalModal').classList.add('active');
+            $('renewalName').focus();
+        }
+        function closeRenewalForm() { $('renewalModal').classList.remove('active'); }
+        function saveRenewal() {
+            const name = $('renewalName').value.trim();
+            if (!name) { toast('서비스 이름을 입력해.'); $('renewalName').focus(); return; }
+            const data = {
+                id: editingRenewalId || newId(), name,
+                status: $('renewalStatus').value,
+                deadline: $('renewalDeadline').value,
+                billing: $('renewalBilling').value,
+                cost: $('renewalCost').value.trim(),
+                alert: Number($('renewalAlert').value),
+                url: safeUrl($('renewalUrl').value.trim()),
+                memo: $('renewalMemo').value.trim(),
+                updatedAt: Date.now()
+            };
+            if (editingRenewalId) renewalItems = renewalItems.map(x => x.id === editingRenewalId ? data : x);
+            else renewalItems.push(data);
+            saveRenewalsToStorage(); closeRenewalForm(); toast('해지·갱신 일정을 저장했어.');
+        }
+        function editRenewal(id) { openRenewalForm(id); }
+        function completeRenewal(id) {
+            const item = renewalItems.find(x => x.id === id);
+            if (!item || !confirm(`${item.name}을(를) 해지 완료로 표시할까? 실제 해지가 완료됐는지 확인한 뒤 눌러.`)) return;
+            item.status = '해지 완료'; saveRenewalsToStorage(); toast('완료 상태로 변경했어.');
+        }
+        function deleteRenewal(id) {
+            if (!confirm('이 일정을 삭제할까?')) return;
+            renewalItems = renewalItems.filter(x => x.id !== id); saveRenewalsToStorage();
+        }
+        function openRenewalUrl(id) {
+            const item = renewalItems.find(x => x.id === id);
+            if (item?.url) window.open(item.url, '_blank', 'noopener,noreferrer');
+        }
+        function checkRenewalAlerts() {
+            const todayKey = new Date().toISOString().slice(0,10);
+            const shownKey = 'membership_alert_shown_' + todayKey;
+            if (localStorage.getItem(shownKey)) return;
+            const due = renewalItems.filter(x => x.status !== '해지 완료').filter(x => {
+                const d = dateDiff(x.deadline || x.billing);
+                return d !== null && d >= 0 && d <= Number(x.alert ?? 3);
+            });
+            if (due.length) {
+                toast(`해지·갱신 확인할 일정 ${due.length}개 있어. 위의 해지·갱신 관리 확인해.`);
+                localStorage.setItem(shownKey, '1');
+            }
         }
 
         function sanitizeHtml(h) {
@@ -1328,6 +1501,8 @@
             async onLogin(user, cloudApi) {
                 cloud = cloudApi || null;
                 loadLocal();
+            renderRenewals();
+            checkRenewalAlerts();
                 if (cloud) {
                     try {
                         const c = await cloud.load();
