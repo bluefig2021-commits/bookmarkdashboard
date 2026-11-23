@@ -58,6 +58,12 @@
             padding: 9px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;
         }
         .gate-box button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .gate-box textarea {
+            width: 100%; min-height: 110px; margin-bottom: 10px; resize: vertical;
+            background: var(--bg-color); color: var(--text-color);
+            border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-size: 13px;
+        }
+        .gate-box button.linkbtn { background: none; color: var(--text-color); opacity: 0.55; font-weight: 400; font-size: 12px; margin-left: 8px; }
 
         .top-bar {
             display: flex;
@@ -471,7 +477,12 @@
             <h1>Start Page</h1>
             <p>관리자 계정으로 로그인해야 열립니다.</p>
             <div id="gateMsg"></div>
+            <div id="cfgBox" hidden>
+                <textarea id="cfgInput" placeholder="Firebase 콘솔의 firebaseConfig 코드를 그대로 붙여넣기"></textarea>
+                <button id="btnCfg">설정 저장</button>
+            </div>
             <button id="btnLogin">Google로 로그인</button>
+            <button id="btnCfgReset" class="linkbtn" hidden>설정 지우기</button>
         </div>
     </section>
 
@@ -1146,13 +1157,20 @@
          ================================================================= -->
     <script type="module">
         /* ===== 설정: 여기만 수정 ===== */
-        // [필수] Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹) > SDK 설정 및 구성 의 값을 그대로 붙여넣기
-        const FIREBASE_CONFIG = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            appId: "YOUR_APP_ID"
-        };
+        // Firebase 설정은 이 파일에 넣지 않습니다. 첫 실행 때 로그인 화면에 붙여넣으면
+        // 이 브라우저의 localStorage에만 저장됩니다. (기기/브라우저마다 1회)
+        const CFG_KEY = "vault_firebase_config";
+        function readCfg() {
+            try { const c = JSON.parse(localStorage.getItem(CFG_KEY) || "null"); return c && c.apiKey ? c : null; }
+            catch { return null; }
+        }
+        // 콘솔의 firebaseConfig 코드(JS 객체/JSON 모두)에서 "키: '값'" 쌍만 추출
+        function parseCfg(text) {
+            const o = {};
+            for (const m of text.matchAll(/["']?(\w+)["']?\s*:\s*["']([^"']*)["']/g)) o[m[1]] = m[2];
+            return o.apiKey && o.authDomain && o.projectId && o.appId ? o : null;
+        }
+        const FIREBASE_CONFIG = readCfg();
         // 허용 관리자: 이 계정 하나만 통과
         const ADMIN_EMAIL = "raizn199x@gmail.com";
         // [선택] true = Firestore에 동기화 (Firestore 생성 + 보안 규칙 적용 후). false = localStorage만.
@@ -1165,11 +1183,20 @@
 
         window.App.onLock("");
 
-        const configured = FIREBASE_CONFIG.apiKey && !String(FIREBASE_CONFIG.apiKey).startsWith("YOUR_");
-        if (!configured) {
+        if (!FIREBASE_CONFIG) {
             document.getElementById('btnLogin').disabled = true;
-            gateMsg.textContent = "FIREBASE_CONFIG가 설정되지 않았습니다. 스크립트 상단의 값을 채우세요.";
+            document.getElementById('cfgBox').hidden = false;
+            gateMsg.textContent = "Firebase 설정을 붙여넣으세요. 이 브라우저에만 저장되고 파일에는 들어가지 않습니다.";
+            document.getElementById('btnCfg').onclick = () => {
+                const cfg = parseCfg(document.getElementById('cfgInput').value);
+                if (!cfg) { gateMsg.textContent = "apiKey, authDomain, projectId, appId가 모두 있어야 합니다."; return; }
+                localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+                location.reload();
+            };
         } else {
+            const reset = document.getElementById('btnCfgReset');
+            reset.hidden = false;
+            reset.onclick = () => { localStorage.removeItem(CFG_KEY); location.reload(); };
             const [{ initializeApp }, am] = await Promise.all([
                 import(FB + "firebase-app.js"),
                 import(FB + "firebase-auth.js")
