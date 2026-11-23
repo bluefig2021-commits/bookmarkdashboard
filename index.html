@@ -189,12 +189,17 @@
         }
         .gallery-item:hover .widget-delete-img { opacity: 1; }
 
-        .rss-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+        .widget-card.rss-widget { column-span: all; width: 100%; }
+        .rss-list { display: flex; flex-direction: column; gap: 0; max-height: 360px; overflow-y: auto; min-width: 0; }
         .rss-item {
-            text-decoration: none; color: var(--text-color); font-size: 13px;
-            padding: 4px 0; border-bottom: 1px solid var(--border-color);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            display: block; text-decoration: none; color: var(--text-color); font-size: 13px;
+            line-height: 1.55; padding: 9px 4px; border-bottom: 1px solid var(--border-color);
+            white-space: normal; overflow-wrap: anywhere;
         }
+        .rss-item:hover { background: var(--hover); }
+        .rss-toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12px; }
+        .rss-toolbar button { border:1px solid var(--border-color); border-radius:7px; padding:6px 10px; background:var(--btn-bg); color:var(--text-color); cursor:pointer; }
+        .rss-status { font-size:12px; opacity:.65; }
 
         /* ===== 요약노트 위젯 ===== */
         .vault-bar {
@@ -1174,7 +1179,7 @@
             widgets.forEach((widget, index) => {
                 const card = document.createElement('div');
                 const isGallery = widget.type === 'gallery';
-                card.className = isGallery ? 'widget-card gallery-mode' : 'widget-card';
+                card.className = isGallery ? 'widget-card gallery-mode' : (widget.type === 'rss' ? 'widget-card rss-widget' : 'widget-card');
 
                 const defaultTitle = widget.type === 'vault' ? '요약노트' : widget.type.toUpperCase();
                 let headerHTML = `
@@ -1242,10 +1247,17 @@
                     card.innerHTML = headerHTML + `<div class="gallery-grid">${imagesHTML}</div>`;
                 }
                 else if (widget.type === 'rss') {
-                    let rssHTML = (widget.items || []).map((item) => `
-                        <a href="${esc(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" class="rss-item">${esc(item.title)}</a>
-                    `).join('') || '<div style="font-size:13px; opacity:0.6;">Loading RSS...</div>';
-                    card.innerHTML = headerHTML + `<div class="rss-list">${rssHTML}</div>`;
+                    const rssItems = widget.items || [];
+                    let rssHTML = rssItems.map((item) => `
+                        <a href="${esc(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" class="rss-item">${esc(item.title || '제목 없음')}</a>
+                    `).join('') || '<div style="font-size:13px; opacity:0.6; padding:10px 2px;">가져온 글이 없어. 새로고침을 눌러 다시 확인해.</div>';
+                    card.innerHTML = headerHTML + `
+                        <div class="rss-toolbar">
+                            <button onclick="refreshRssWidget(${index})">새로고침</button>
+                            <button onclick="sendRssToVault(${index})">글 ${rssItems.length}개를 핵심노트로 보내기</button>
+                            <span class="rss-status">${rssItems.length}개 수집됨</span>
+                        </div>
+                        <div class="rss-list">${rssHTML}</div>`;
                 }
                 else if (widget.type === 'vault') {
                     const filterType = widget.filter || 'active';
@@ -1436,6 +1448,33 @@
             }
 
             closeModal();
+        }
+
+
+        async function refreshRssWidget(index) {
+            const widget = widgets[index];
+            if (!widget || widget.type !== 'rss' || !widget.feedUrl) return;
+            toast('RSS 새 글을 확인하고 있어...');
+            await fetchRssFeed(widget, widget.feedUrl);
+            if (widget.items && widget.items.length) {
+                save(); renderWidgets();
+                toast(`RSS ${widget.items.length}개 항목을 불러왔어.`);
+            } else {
+                toast('RSS를 가져오지 못했어. 주소 또는 사이트의 외부접속 제한을 확인해.');
+            }
+        }
+
+        function sendRssToVault(index) {
+            const widget = widgets[index];
+            if (!widget || widget.type !== 'rss' || !Array.isArray(widget.items) || !widget.items.length) {
+                toast('먼저 RSS 글을 불러와야 해.');
+                return;
+            }
+            const vault = getVaultWidget();
+            const lines = widget.items.map(item => `${item.title || ''} ${item.link || ''}`.trim()).filter(Boolean);
+            const result = addLinesTo(vault, lines);
+            save(); renderWidgets();
+            toast(`핵심노트로 ${result.added}개 추가 · 중복 ${result.dup}개 제외`);
         }
 
         async function fetchRssFeed(widget, rssUrl) {
