@@ -79,36 +79,6 @@
             backdrop-filter: blur(10px);
         }
 
-        .search-container {
-            display: flex;
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 10px 18px;
-            backdrop-filter: blur(10px);
-            align-items: center;
-            max-width: 800px;
-            margin: 0 auto 20px auto;
-        }
-
-        .search-container input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-color);
-            font-size: 16px;
-            outline: none;
-        }
-
-        .search-container button {
-            background: transparent;
-            border: none;
-            color: var(--text-color);
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
         .action-buttons {
             display: flex;
             justify-content: center;
@@ -134,7 +104,6 @@
             background: var(--hover);
         }
 
-        /* Dashboard masonry layout - cards pack tightly like a moodboard */
         .dashboard-grid {
             column-count: 3;
             column-gap: 24px;
@@ -160,7 +129,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Gallery moodboard mode: no card shell, border, or padding */
         .widget-card.gallery-mode {
             background: transparent !important;
             border: none !important;
@@ -180,7 +148,6 @@
             padding-bottom: 8px;
         }
 
-        /* Gallery mode header overlay (only appears on hover) */
         .widget-card.gallery-mode .widget-header {
             position: absolute;
             top: 0;
@@ -232,7 +199,6 @@
         }
         .widget-add-sub:hover, .widget-delete:hover { opacity: 1; }
 
-        /* Bookmark list */
         .bookmark-list {
             display: flex;
             flex-direction: column;
@@ -275,7 +241,6 @@
         }
         .action-icon-btn:hover { opacity: 1; }
 
-        /* Memo styles */
         .memo-toolbar {
             display: none;
             gap: 6px;
@@ -308,7 +273,6 @@
             padding: 4px 0;
         }
 
-        /* YouTube style */
         .youtube-container {
             position: relative;
             width: 100%;
@@ -324,7 +288,6 @@
             border: none;
         }
 
-        /* Gallery - no card shell, fill 100% */
         .gallery-grid { display: flex; flex-direction: column; gap: 16px; width: 100%; }
         .gallery-item { position: relative; width: 100%; }
         .gallery-item img {
@@ -356,7 +319,6 @@
         }
         .gallery-item:hover .widget-delete-img { opacity: 1; }
 
-        /* RSS feed */
         .rss-list {
             display: flex;
             flex-direction: column;
@@ -394,7 +356,7 @@
         .note-top input[type=checkbox] { margin-top: 3px; flex: none; }
         .note-main { flex: 1; min-width: 0; }
         .note-title { font-weight: 700; font-size: 14px; word-break: break-word; }
-        .note-cat { font-size: 11px; opacity: 0.6; }
+        .note-cat { font-size: 11px; opacity: 0.65; }
         .note-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; opacity: 0.7; }
         .note-del:hover { opacity: 1; }
         .nsec { font-size: 12px; }
@@ -411,7 +373,6 @@
         .note-links a { font-size: 11px; color: inherit; opacity: 0.75; word-break: break-all; }
         .vault-empty { font-size: 13px; opacity: 0.6; }
 
-        /* Modal popup */
         .modal {
             display: none;
             position: fixed;
@@ -432,28 +393,28 @@
             max-width: 92vw;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 14px;
             color: var(--text-color);
             backdrop-filter: blur(10px);
         }
-        .modal-box.wide { width: 560px; }
+        .modal-box.wide { width: 540px; }
         .modal-box h3 { margin: 0; }
         .modal-box input, .modal-box textarea {
             background: var(--bg-color);
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px;
+            border-radius: 8px;
             outline: none;
             font-size: 14px;
             font-family: inherit;
         }
-        .modal-box textarea { min-height: 170px; resize: vertical; }
+        .modal-box textarea { min-height: 150px; resize: vertical; line-height: 1.5; }
         .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; }
-        .modal-buttons button { padding: 6px 12px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; }
+        .modal-buttons button { padding: 8px 14px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; }
         .btn-cancel { background: var(--border-color); color: var(--text-color); }
         .btn-submit { background: var(--text-color); color: var(--bg-color); }
-        #vaultStatus { font-size: 13px; opacity: 0.8; min-height: 1.3em; }
+        #vaultStatus { font-size: 13px; opacity: 0.85; min-height: 1.3em; }
 
         #toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -465,7 +426,6 @@
 </head>
 <body>
 
-    <!-- ===== 잠금 화면: 관리자 통과 전까지 항상 표시 ===== -->
     <section id="gate">
         <div class="gate-box">
             <h1>Start Page</h1>
@@ -475,7 +435,6 @@
         </div>
     </section>
 
-    <!-- ===== 대시보드: 관리자 통과 후에만 표시 ===== -->
     <div id="app" hidden>
         <div class="top-bar">
             <span id="who"></span>
@@ -510,15 +469,14 @@
         </div>
     </div>
 
+    <!-- 간소화된 요약노트 입력 모달: 텍스트 한 방에 붙여넣고 변환만 -->
     <div class="modal" id="vaultModal">
         <div class="modal-box wide">
             <h3 id="vaultModalTitle">요약노트로 변환</h3>
-            <textarea id="vaultPaste" placeholder="한 줄에 하나씩 붙여넣으세요. 북마크 HTML 내보내기 내용도 가능합니다.&#10;예) [앱테크] 출석 체크 500p 매일 https://example.com/attend&#10;예) [멤버십] 쿠팡 와우 해지 매월 15일 자동결제 4,990원 https://example.com"></textarea>
-            <input type="url" id="vaultUrl" placeholder="items.json / light.json / RSS 주소 (선택)">
+            <textarea id="vaultPaste" placeholder="아무렇게나 붙여넣어도 카테고리·방식·날짜를 자동으로 뽑습니다.&#10;예) [앱테크] 경단기 스터디 플래너 1600명 추첨 1123 124 https://...&#10;예) 즉당 편의점 쿠폰 11/23~12/4"></textarea>
             <div id="vaultStatus" role="status"></div>
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="closeVaultModal()">닫기</button>
-                <button class="btn-cancel" onclick="vaultFetchUrl()">주소에서 불러오기</button>
                 <button class="btn-submit" onclick="vaultSubmit()">노트로 변환</button>
             </div>
         </div>
@@ -526,20 +484,16 @@
 
     <div id="toast" role="status"></div>
 
-    <!-- =================================================================
-         대시보드 로직 (일반 스크립트: 인라인 onclick 핸들러용 전역 함수)
-         ================================================================= -->
     <script>
-        const LS_KEY = 'dashboard_widgets';       // 기존 Start Page 데이터 키 그대로 사용
+        const LS_KEY = 'dashboard_widgets';
         const LS_TS = 'dashboard_updated_at';
         const WIDGET_TYPES = ['bookmark', 'memo', 'youtube', 'gallery', 'rss', 'vault'];
 
         let widgets = [];
-        let cloud = null;                          // 관리자 로그인 후 Firestore 어댑터 (USE_FIRESTORE=true 일 때만)
+        let cloud = null;
         let modalState = { type: '', targetIndex: null };
         let vaultTarget = null;
 
-        /* ---------- 유틸 ---------- */
         const $ = (id) => document.getElementById(id);
         const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         const safeUrl = (u) => (/^https?:\/\//i.test(String(u)) ? String(u) : '');
@@ -570,7 +524,6 @@
             return d.body.innerHTML;
         }
 
-        /* ---------- 저장 ---------- */
         function persistLocal() { localStorage.setItem(LS_KEY, JSON.stringify(widgets)); }
 
         let cloudTimer;
@@ -590,20 +543,30 @@
             catch { widgets = []; }
         }
 
-        /* ---------- 요약노트 규칙 엔진 (외부 AI/유료 API 없음) ---------- */
+        /* ---------- 자동 파싱 엔진 (카테고리 · 방식 · 축약 날짜 · 혜택) ---------- */
         const URL_RE = /https?:\/\/[^\s<>"')\]]+/gi;
         const TAG_RE = /\[([^\]]{1,20})\]/g;
-        const BENEFIT_RE = /(\d[\d,]*(?:\.\d+)?)\s*(만원|천원|원|포인트|캐시|코인|쿠폰|%|배|개월|pt|p(?![a-z]))/gi;
+        const BENEFIT_RE = /(\d[\d,]*(?:\.\d+)?)\s*(명|만원|천원|원|포인트|캐시|코인|쿠폰|%|배|개월|pt|p(?![a-z]))/gi;
         const BENEFIT_WORDS = /무료체험|무료|공짜|적립|할인|캐시백|리워드|증정|사은품|무배|무료배송/g;
+
+        const MECHANIC_PATTERNS = [
+            ['즉당', /즉당|즉시당첨/],
+            ['추첨', /추첨|응모|당첨/],
+            ['선착순', /선착순/],
+            ['출석', /출석|출첵/],
+            ['미션·퀴즈', /퀴즈|미션|만보기|룰렛|복권|사다리/]
+        ];
+
         const DATE_RES = [
             /\d{4}\s?[.\-\/]\s?\d{1,2}\s?[.\-\/]\s?\d{1,2}/g,
             /\d{1,2}월\s?\d{1,2}일/g,
-            /\d{1,2}\/\d{1,2}(?=\s*(?:까지|마감|종료|해지|결제))/g,
+            /\d{1,2}\/\d{1,2}/g,
             /D-\d+/gi,
             /매월\s?\d{1,2}일/g,
             /\d{1,2}일\s?(?:까지|마다|결제|갱신)/g,
             /(?:오늘|내일|이번\s?주|이번\s?달|월말|연말)(?:\s?까지)?/g
         ];
+
         const FLAG_KEYS = ['해지', '자동결제', '결제', '구독', '갱신', '취소', '환불', '만료', '마감', '무료체험', '위약', '약정', '종료', '까지'];
         const CHECKS = [
             [/해지/, '해지 경로·기한 확인'],
@@ -616,9 +579,28 @@
         ];
         const CATS = [
             ['멤버십·구독', /해지|구독|멤버십|갱신|자동결제|무료체험|약정/],
-            ['앱테크', /앱테크|포인트|캐시|리워드|출석|적립|코인|룰렛|만보기/],
+            ['앱테크', /앱테크|즉당|추첨|포인트|캐시|리워드|출석|적립|코인|룰렛|만보기|선착순/],
             ['쇼핑·생활', /쿠폰|할인|최저가|구매|배송|장바구니|쇼핑|생활|특가/]
         ];
+
+        // "1123" -> "11/23", "124" -> "12/4" 처럼 축약된 월일 숫자 추출
+        function extractCompactDates(str) {
+            const found = [];
+            const withoutUrls = str.replace(URL_RE, ' ');
+            // 4자리 (MMDD, 0101~1231)
+            for (const m of withoutUrls.matchAll(/(?<!\d)(0[1-9]|1[0-2])([0-2]\d|3[01])(?!\d)/g)) {
+                found.push(`${Number(m[1])}/${Number(m[2])}`);
+            }
+            // 3자리 (MDD, 101~931 / 111~129 등: 앞에 ~, -, ~, 공백, 날짜/기한/추첨/마감 주변 또는 단독 숫자)
+            for (const m of withoutUrls.matchAll(/(?<!\d)([1-9])([0-2]\d|3[01])(?!\d)/g)) {
+                const month = Number(m[1]);
+                const day = Number(m[2]);
+                if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                    found.push(`${month}/${day}`);
+                }
+            }
+            return uniq(found);
+        }
 
         function normUrl(u) {
             try {
@@ -636,30 +618,41 @@
             const tags = uniq([...raw.matchAll(TAG_RE)].map((m) => m[1].trim()));
             const text = raw.replace(URL_RE, ' ').replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
 
+            const mechanics = MECHANIC_PATTERNS.filter(([, re]) => re.test(raw)).map(([label]) => label);
+
             const benefits = uniq([
+                ...mechanics,
                 ...[...raw.matchAll(BENEFIT_RE)].map((m) => m[0].replace(/\s+/g, '')),
                 ...(raw.match(BENEFIT_WORDS) || [])
             ]);
+
             let deadlines = [];
             DATE_RES.forEach((re) => { deadlines.push(...(raw.match(re) || []).map((s) => s.trim())); });
+            deadlines.push(...extractCompactDates(raw));
             deadlines = uniq(deadlines);
+
             const flags = FLAG_KEYS.filter((k) => raw.includes(k));
             const checks = uniq(CHECKS.filter(([re]) => re.test(raw)).map(([, label]) => label));
 
-            let category = '북마크';
+            let category = '앱테크';
             const tagHit = CATS.find(([name]) => tags.some((t) => name.includes(t) || t.includes(name.split('·')[0])));
             if (tagHit) category = tagHit[0];
-            else { const hit = CATS.find(([, re]) => re.test(raw)); if (hit) category = hit[0]; }
+            else {
+                const hit = CATS.find(([, re]) => re.test(raw));
+                if (hit) category = hit[0];
+                else if (tags.length) category = tags[0];
+            }
 
             let host = '';
             try { host = new URL(urls[0]).hostname.replace(/^www\./, ''); } catch {}
             const base = text || tags.join(' ') || host || '(내용 없음)';
+
             return {
                 id: newId(),
                 key: urls.length ? 'U:' + normUrl(urls[0]) : 'T:' + text.toLowerCase().replace(/\s+/g, ''),
                 raw, category, tags, urls, benefits, deadlines, flags, checks,
-                title: base.length > 48 ? base.slice(0, 48) + '…' : base,
-                summary: base.length > 110 ? base.slice(0, 110) + '…' : base,
+                title: base.length > 52 ? base.slice(0, 52) + '…' : base,
+                summary: base.length > 120 ? base.slice(0, 120) + '…' : base,
                 done: false, createdAt: Date.now()
             };
         }
@@ -683,7 +676,6 @@
             return { added, dup };
         }
 
-        /* ---------- 입력 정규화 (텍스트 / 북마크 HTML / JSON / RSS) ---------- */
         function htmlToLines(html) {
             const doc = new DOMParser().parseFromString(html, 'text/html');
             return [...doc.querySelectorAll('a[href]')].map((a) => `${a.textContent.trim()} ${a.href}`);
@@ -716,7 +708,6 @@
             return text.split(/\r?\n/).map((l) => l.replace(/\t/g, ' '));
         }
 
-        /* ---------- 백업 / 복원 ---------- */
         function exportBackup() {
             const blob = new Blob([JSON.stringify({ app: 'startpage-vault', v: 1, exportedAt: new Date().toISOString(), widgets }, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
@@ -730,7 +721,7 @@
             return arr.filter((w) => w && WIDGET_TYPES.includes(w.type)).map((w) => {
                 if (w.type === 'vault') {
                     const notes = (w.notes || []).filter((n) => n && typeof n.raw === 'string').map((n) => {
-                        const x = parseNote(n.raw); x.done = !!n.done; return x;   // 원문에서 다시 파싱: 외부 데이터 신뢰 안 함
+                        const x = parseNote(n.raw); x.done = !!n.done; return x;
                     });
                     return { type: 'vault', title: String(w.title || 'VAULT'), notes, hideDone: !!w.hideDone };
                 }
@@ -755,16 +746,30 @@
             return `병합 완료: 위젯 ${incoming.length}개, 새 노트 ${notes}건`;
         }
 
+        // JSON 문법이 확실할 때만 JSON 파싱, 일반 텍스트는 무조건 노트 파서로 직행
+        function tryParseStrictJson(s) {
+            const trimmed = s.trim();
+            if (!((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']')))) {
+                return null;
+            }
+            try { return JSON.parse(trimmed); }
+            catch { return null; }
+        }
+
         async function ingestBody(body, widget) {
             const s = body.trim();
-            if (s.startsWith('{') || s.startsWith('[')) {
-                const d = JSON.parse(s);
-                if (d && d.app === 'startpage-vault' && Array.isArray(d.widgets)) return importBackup(d);
-                const r = addLinesTo(widget, jsonToLines(d)); save(); renderWidgets();
+            const parsedJson = tryParseStrictJson(s);
+            if (parsedJson !== null) {
+                if (parsedJson && parsedJson.app === 'startpage-vault' && Array.isArray(parsedJson.widgets)) {
+                    return importBackup(parsedJson);
+                }
+                const r = addLinesTo(widget, jsonToLines(parsedJson));
+                save(); renderWidgets();
                 return `추가 ${r.added}건 · 중복 제외 ${r.dup}건`;
             }
             const lines = /^<\?xml|<rss|<feed/i.test(s.slice(0, 300)) ? xmlToLines(s) : textToLines(s);
-            const r = addLinesTo(widget, lines); save(); renderWidgets();
+            const r = addLinesTo(widget, lines);
+            save(); renderWidgets();
             return `추가 ${r.added}건 · 중복 제외 ${r.dup}건`;
         }
 
@@ -787,37 +792,24 @@
             e.target.value = '';
         });
 
-        /* ---------- 요약노트 모달 ---------- */
         function openVaultModal(index) {
             vaultTarget = index;
-            $('vaultPaste').value = ''; $('vaultUrl').value = ''; $('vaultStatus').textContent = '';
+            $('vaultPaste').value = '';
+            $('vaultStatus').textContent = '';
             $('vaultModal').classList.add('active');
+            setTimeout(() => $('vaultPaste').focus(), 50);
         }
         function closeVaultModal() { $('vaultModal').classList.remove('active'); }
 
         async function vaultSubmit() {
             const text = $('vaultPaste').value;
-            if (!text.trim()) { $('vaultStatus').textContent = '붙여넣은 내용이 없습니다.'; return; }
+            if (!text.trim()) { $('vaultStatus').textContent = '내용을 입력하세요.'; return; }
             try {
                 $('vaultStatus').textContent = await ingestBody(text, getVaultWidget());
                 $('vaultPaste').value = '';
             } catch (e) { $('vaultStatus').textContent = '실패: ' + e.message; }
         }
 
-        async function vaultFetchUrl() {
-            const url = $('vaultUrl').value.trim();
-            if (!/^https?:\/\//i.test(url) && !/^[\w./-]+\.(json|xml|rss)$/i.test(url)) { $('vaultStatus').textContent = '주소 형식이 올바르지 않습니다.'; return; }
-            $('vaultStatus').textContent = '불러오는 중...';
-            try {
-                const res = await fetch(url, { cache: 'no-store' });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                $('vaultStatus').textContent = await ingestBody(await res.text(), getVaultWidget());
-            } catch (e) {
-                $('vaultStatus').textContent = '불러오기 실패: ' + e.message + ' (다른 도메인은 CORS로 막힐 수 있음 → 내용을 열어 복사해 붙여넣기)';
-            }
-        }
-
-        /* ---------- 렌더 ---------- */
         function noteHTML(n, wi) {
             const chips = (a) => a.map((x) => `<span class="chip">${esc(x)}</span>`).join('');
             const cond = [...(n.benefits || []), ...(n.tags || []).filter((t) => !String(n.category).includes(t))];
@@ -834,9 +826,9 @@
                     <button class="note-del" data-vact="del" data-w="${wi}" data-n="${esc(n.id)}" title="삭제">×</button>
                 </div>
                 <div class="nsec s1"><span class="lab">핵심 요약</span><span class="txt">${esc(n.summary)}</span></div>
-                <div class="nsec s2"><span class="lab">혜택·수치·조건</span>
+                <div class="nsec s2"><span class="lab">혜택·방식·수치</span>
                     ${cond.length ? `<div class="chips">${chips(cond)}</div>` : '<span class="txt none">없음</span>'}</div>
-                <div class="nsec s3"><span class="lab">기한·해지·체크</span>
+                <div class="nsec s3"><span class="lab">일정·기한·체크</span>
                     ${dl.length ? `<div class="chips">${chips(dl)}</div>` : ''}
                     ${fl.length ? `<div class="chips">${chips(fl)}</div>` : ''}
                     ${ck.length ? `<ul class="chk">${ck.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
@@ -942,7 +934,6 @@
             });
         }
 
-        /* 요약노트 카드 이벤트 (data 속성 기반 위임) */
         $('dashboardGrid').addEventListener('click', (e) => {
             const t = e.target.closest('[data-vact]'); if (!t) return;
             const w = widgets[Number(t.dataset.w)];
@@ -964,7 +955,6 @@
             w.notes = w.notes.filter((n) => !n.done); save(); renderWidgets();
         }
 
-        /* ---------- 테마 ---------- */
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
             localStorage.setItem('theme_v2', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
@@ -973,7 +963,6 @@
             document.body.classList.add('dark-mode');
         }
 
-        /* ---------- 위젯 조작 (기존 기능) ---------- */
         function updateWidgetTitle(index, title) {
             widgets[index].title = title;
             save();
@@ -1071,7 +1060,6 @@
             }
         }
 
-        // 직접 fetch(+XML 파싱) 먼저, CORS로 막히면 rss2json으로 대체
         async function fetchRssFeed(widget, rssUrl) {
             try {
                 const res = await fetch(rssUrl);
@@ -1084,7 +1072,7 @@
                 if (!its.length) throw new Error('empty');
                 widget.items = its; persistLocal(); renderWidgets();
                 return;
-            } catch (e) { /* fallthrough */ }
+            } catch (e) { }
             try {
                 const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
                 const data = await res.json();
@@ -1106,7 +1094,6 @@
         function deleteBookmarkItem(widgetIdx, itemIdx) { widgets[widgetIdx].items.splice(itemIdx, 1); save(); renderWidgets(); }
         function deleteGalleryItem(widgetIdx, imgIdx) { widgets[widgetIdx].images.splice(imgIdx, 1); save(); renderWidgets(); }
 
-        /* ---------- 인증 모듈이 호출하는 진입점 ---------- */
         window.App = {
             async onLogin(user, cloudApi) {
                 cloud = cloudApi || null;
@@ -1141,12 +1128,7 @@
         };
     </script>
 
-    <!-- =================================================================
-         Firebase 관리자 잠금 (모듈 스크립트)
-         ================================================================= -->
     <script type="module">
-        /* ===== 설정: 여기만 수정 ===== */
-        // Firebase 웹 앱 설정 (기존 프로젝트 water-log132)
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyAagWKtXuvQOhV-__Mxmd5ys8vs0xDDCUs",
             authDomain: "water-log132.firebaseapp.com",
@@ -1156,11 +1138,8 @@
             appId: "1:569667354916:web:f9c9b9a028e81f53f7f3b1",
             measurementId: "G-YDQ38GTXP3"
         };
-        // 허용 관리자: 이 계정 하나만 통과
         const ADMIN_EMAIL = "raizn199x@gmail.com";
-        // [선택] true = Firestore에 동기화 (Firestore 생성 + 보안 규칙 적용 후). false = localStorage만.
         const USE_FIRESTORE = false;
-        /* ============================ */
 
         const FB = "https://www.gstatic.com/firebasejs/10.14.1/";
         const gateMsg = document.getElementById('gateMsg');
@@ -1168,7 +1147,7 @@
 
         window.App.onLock("");
 
-        {   // 인증 초기화
+        {
             const [{ initializeApp }, am] = await Promise.all([
                 import(FB + "firebase-app.js"),
                 import(FB + "firebase-auth.js")
