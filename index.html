@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Start Page</title>
+    <title>정보 자동화 작업실</title>
     <style>
         :root {
             --bg-color: #f3f5f9;
@@ -381,6 +381,37 @@
         .renewal-note { font-size:11px; opacity:.65; line-height:1.5; margin-top:10px; }
         @media(max-width:600px){ .renewal-form-grid{grid-template-columns:1fr;} .renewal-form-grid .full{grid-column:auto;} }
 
+
+        /* 정보 강조 규격: 긴급한 항목만 강하게 표시 */
+        :root { --priority-red:#c83f4f; --priority-orange:#b87518; --priority-blue:#376da8; }
+        .renewal-card.overdue, .point-card.overdue { border:2px solid var(--priority-red); background:color-mix(in srgb, var(--priority-red) 7%, var(--panel-bg)); }
+        .renewal-card.soon, .point-card.soon { border:2px solid var(--priority-orange); background:color-mix(in srgb, var(--priority-orange) 7%, var(--panel-bg)); }
+        .priority-label { display:inline-flex; align-items:center; border-radius:6px; padding:3px 7px; font-size:11px; font-weight:800; margin-bottom:6px; }
+        .priority-label.red { color:var(--priority-red); background:color-mix(in srgb, var(--priority-red) 12%, transparent); }
+        .priority-label.orange { color:var(--priority-orange); background:color-mix(in srgb, var(--priority-orange) 13%, transparent); }
+        .priority-label.blue { color:var(--priority-blue); background:color-mix(in srgb, var(--priority-blue) 12%, transparent); }
+        .date-quick { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+        .date-quick button { border:1px solid var(--border-color); background:var(--btn-bg); color:var(--text-color); border-radius:7px; padding:5px 8px; font-size:11px; cursor:pointer; }
+        .point-panel { max-width:1200px; margin:0 auto 22px; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:14px; padding:16px; }
+        .point-head { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+        .point-head h2 { font-size:16px; margin:0; }
+        .point-head button { border:1px solid var(--border-color); border-radius:7px; padding:7px 10px; background:var(--btn-bg); color:var(--text-color); cursor:pointer; font-size:12px; }
+        .point-summary { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 12px; }
+        .point-summary span { background:var(--btn-bg); border-radius:8px; padding:7px 10px; font-size:12px; }
+        .point-summary b { font-size:16px; margin-right:4px; }
+        .point-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:9px; }
+        .point-card { border:1px solid var(--border-color); border-radius:10px; padding:11px; min-width:0; }
+        .point-card h3 { font-size:14px; margin:0 0 6px; }
+        .point-meta { font-size:12px; line-height:1.65; opacity:.86; overflow-wrap:anywhere; }
+        .point-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:9px; }
+        .point-actions button { border:1px solid var(--border-color); border-radius:7px; padding:6px 9px; background:var(--btn-bg); color:var(--text-color); cursor:pointer; font-size:12px; }
+        .point-actions .danger { color:var(--priority-red); }
+        .point-empty { font-size:13px; opacity:.6; padding:12px 2px; }
+        .point-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .point-form-grid label { display:flex; flex-direction:column; gap:5px; font-size:12px; }
+        .point-form-grid input, .point-form-grid select, .point-form-grid textarea { width:100%; padding:9px; border:1px solid var(--border-color); border-radius:7px; background:var(--panel-bg); color:var(--text-color); font:inherit; }
+        @media(max-width:600px){ .point-form-grid{grid-template-columns:1fr;} }
+
         #toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: var(--panel-bg); border: 1px solid var(--border-color);
@@ -429,6 +460,13 @@
           <div class="renewal-summary" id="renewalSummary"></div>
           <div class="renewal-list" id="renewalList"></div>
           <div class="renewal-note">※ 이 기능은 일정과 알림을 관리하는 기능이야. 실제 구독 해지는 각 서비스에서 직접 해야 해. 브라우저를 닫아둔 동안에는 알림이 실행되지 않으므로 중요한 일정은 휴대폰 캘린더에도 등록해 둬.</div>
+        </section>
+
+
+        <section class="point-panel" aria-label="포인트 소멸 관리">
+          <div class="point-head"><div><h2>포인트·쿠폰 소멸 관리</h2><div class="renewal-sub">소멸 예정일을 등록하면 남은 기간과 확인 우선순위를 자동 표시해.</div></div><button type="button" onclick="openPointForm()">+ 포인트 등록</button></div>
+          <div class="point-summary" id="pointSummary"></div><div class="point-list" id="pointList"></div>
+          <div class="renewal-note">※ 포인트 잔액과 유효기간은 서비스에서 직접 확인해 입력해야 해. 등록된 날짜를 기준으로 남은 기간과 강조 표시를 자동 계산해.</div>
         </section>
 
         <div class="dashboard-grid" id="dashboardGrid"></div>
@@ -486,8 +524,8 @@
         <div class="renewal-form-grid">
           <label>서비스·멤버십 이름<input id="renewalName" placeholder="예: OTT 멤버십, 쇼핑 멤버십"></label>
           <label>상태<select id="renewalStatus"><option value="해지 예정">해지 예정</option><option value="유지">유지</option><option value="해지 완료">해지 완료</option></select></label>
-          <label>해지해야 하는 날짜<input id="renewalDeadline" type="date"></label>
-          <label>다음 결제·갱신 날짜<input id="renewalBilling" type="date"></label>
+          <label>해지해야 하는 날짜<input id="renewalDeadline" type="date"><div class="date-quick"><button type="button" onclick="setDateQuick('renewalDeadline',1)">내일</button><button type="button" onclick="setDateQuick('renewalDeadline',3)">3일 뒤</button><button type="button" onclick="setDateQuick('renewalDeadline',7)">일주일 뒤</button></div></label>
+          <label>다음 결제·갱신 날짜<input id="renewalBilling" type="date"><div class="date-quick"><button type="button" onclick="setDateQuick('renewalBilling',7)">7일 뒤</button><button type="button" onclick="setDateQuick('renewalBilling',30)">30일 뒤</button><button type="button" onclick="setDateQuick('renewalBilling',365)">1년 뒤</button></div></label>
           <label>예상 결제 금액<input id="renewalCost" placeholder="예: 4,990원"></label>
           <label>알림 시점<select id="renewalAlert"><option value="7">7일 전</option><option value="3" selected>3일 전</option><option value="1">하루 전</option><option value="0">당일</option></select></label>
           <label class="full">해지 페이지 주소<input id="renewalUrl" type="url" placeholder="https://..."></label>
@@ -497,6 +535,21 @@
         <div class="modal-buttons"><button class="btn-cancel" onclick="closeRenewalForm()">취소</button><button class="btn-submit" onclick="saveRenewal()">저장</button></div>
       </div>
     </div>
+
+
+    <div class="modal" id="pointModal"><div class="modal-box wide">
+      <div class="vault-head"><div><h3 id="pointModalTitle">포인트·쿠폰 등록</h3><p>소멸 날짜만 넣어도 남은 기간과 경고 표시는 자동으로 계산돼.</p></div><button class="btn-cancel" onclick="closePointForm()">닫기</button></div>
+      <div class="point-form-grid">
+        <label>서비스·포인트 이름<input id="pointName" placeholder="예: 네이버페이 포인트"></label>
+        <label>잔액·수량<input id="pointAmount" placeholder="예: 3,200P / 쿠폰 1장"></label>
+        <label>적립·발급일<input id="pointEarned" type="date"></label>
+        <label>소멸·사용 마감일<input id="pointExpiry" type="date"></label>
+        <label style="grid-column:1/-1">메모<input id="pointMemo" placeholder="사용 조건, 최소 결제금액 등"></label>
+      </div>
+      <div class="date-quick"><button type="button" onclick="setDateQuick('pointExpiry',7)">7일 뒤</button><button type="button" onclick="setDateQuick('pointExpiry',14)">14일 뒤</button><button type="button" onclick="setDateQuick('pointExpiry',30)">30일 뒤</button><button type="button" onclick="setDateQuick('pointExpiry',90)">90일 뒤</button></div>
+      <div class="renewal-note">정확한 소멸일을 모르면 임의 날짜를 넣지 말고, 서비스에서 확인한 뒤 등록해. 여러 포인트의 유효기간이 다르면 각각 따로 등록하는 게 안전해.</div>
+      <div class="modal-buttons"><button class="btn-cancel" onclick="closePointForm()">취소</button><button class="btn-submit" onclick="savePoint()">저장</button></div>
+    </div></div>
 
     <div id="toast" role="status"></div>
 
@@ -532,6 +585,40 @@
             toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3500);
         }
 
+
+        /* ---------- 날짜 빠른 입력 ---------- */
+        function setDateQuick(inputId, days) {
+            const d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+days);
+            const value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const el = $(inputId); if (el) { el.value=value; el.dispatchEvent(new Event('change',{bubbles:true})); }
+        }
+
+        /* ---------- 포인트·쿠폰 소멸 관리 ---------- */
+        const POINT_KEY = 'point_expiry_tracker_v1';
+        let pointItems = (()=>{ try { const v=JSON.parse(localStorage.getItem(POINT_KEY)||'[]'); return Array.isArray(v)?v:[]; } catch { return []; } })();
+        let editingPointId = null;
+        function savePoints() { localStorage.setItem(POINT_KEY,JSON.stringify(pointItems)); renderPoints(); }
+        function renderPoints() {
+            const list=$('pointList'), summary=$('pointSummary'); if(!list||!summary)return;
+            const active=pointItems.filter(x=>!x.used);
+            const urgent=active.filter(x=>{const d=dateDiff(x.expiry);return d!==null&&d<=3;});
+            const week=active.filter(x=>{const d=dateDiff(x.expiry);return d!==null&&d>=0&&d<=7;});
+            summary.innerHTML=`<span><b>${active.length}</b> 보유 항목</span><span><b>${urgent.length}</b> 3일 이내 확인</span><span><b>${week.length}</b> 7일 이내 소멸</span>`;
+            if(!pointItems.length){list.innerHTML='<div class="point-empty">등록된 포인트가 없어. 소멸일이 있는 포인트나 쿠폰을 추가해 둬.</div>';return;}
+            const sorted=[...pointItems].sort((a,b)=>(dateDiff(a.expiry)??99999)-(dateDiff(b.expiry)??99999));
+            list.innerHTML=sorted.map(x=>{
+                const d=dateDiff(x.expiry); const cls=x.used?'':(d!==null&&d<0?'overdue':d!==null&&d<=7?'soon':'');
+                const status=x.used?'사용 완료':!x.expiry?'소멸일 미입력':d<0?`${Math.abs(d)}일 지남 · 확인 필요`:d===0?'오늘 소멸':`${d}일 남음`;
+                const tone=x.used?'blue':d!==null&&d<=3?'red':d!==null&&d<=7?'orange':'';
+                return `<article class="point-card ${cls}"><h3>${esc(x.name)}</h3>${tone?`<span class="priority-label ${tone}">${esc(status)}</span>`:''}<div class="point-meta">${x.amount?`잔액·수량 ${esc(x.amount)}<br>`:''}${x.earned?`적립·발급 ${esc(x.earned)}<br>`:''}${x.expiry?`소멸 마감 ${esc(x.expiry)}<br>`:''}${!tone?esc(status):''}${x.memo?`<br>${esc(x.memo)}`:''}</div><div class="point-actions"><button onclick="editPoint('${esc(x.id)}')">수정</button><button onclick="togglePointUsed('${esc(x.id)}')">${x.used?'미사용으로':'사용 완료'}</button><button class="danger" onclick="deletePoint('${esc(x.id)}')">삭제</button></div></article>`;
+            }).join('');
+        }
+        function openPointForm(id=null){editingPointId=id;const x=id?pointItems.find(v=>v.id===id):null;$('pointModalTitle').textContent=x?'포인트 정보 수정':'포인트·쿠폰 등록';$('pointName').value=x?.name||'';$('pointAmount').value=x?.amount||'';$('pointEarned').value=x?.earned||'';$('pointExpiry').value=x?.expiry||'';$('pointMemo').value=x?.memo||'';$('pointModal').classList.add('active');$('pointName').focus();}
+        function closePointForm(){$('pointModal').classList.remove('active');}
+        function savePoint(){const name=$('pointName').value.trim();if(!name){toast('포인트 이름을 입력해.');$('pointName').focus();return;}const data={id:editingPointId||newId(),name,amount:$('pointAmount').value.trim(),earned:$('pointEarned').value,expiry:$('pointExpiry').value,memo:$('pointMemo').value.trim(),used:pointItems.find(x=>x.id===editingPointId)?.used||false};if(editingPointId)pointItems=pointItems.map(x=>x.id===editingPointId?data:x);else pointItems.push(data);savePoints();closePointForm();toast('포인트 일정을 저장했어.');}
+        function editPoint(id){openPointForm(id);}
+        function togglePointUsed(id){const x=pointItems.find(v=>v.id===id);if(!x)return;x.used=!x.used;savePoints();}
+        function deletePoint(id){if(!confirm('이 포인트 항목을 삭제할까?'))return;pointItems=pointItems.filter(x=>x.id!==id);savePoints();}
 
         /* ---------- 멤버십·구독 해지 일정 ---------- */
         const RENEWAL_KEY = 'membership_renewal_tracker_v1';
@@ -582,7 +669,7 @@
                 const cls = item.status !== '해지 완료' && d !== null && d < 0 ? 'overdue' : item.status !== '해지 완료' && d !== null && d <= 3 ? 'soon' : '';
                 return `<article class="renewal-card ${cls}">
                   <h3>${esc(item.name)}</h3>
-                  <div class="renewal-meta"><b>${esc(urgency)}</b><br>${esc(dateLabel)}<br>${item.billing ? `결제 예정 ${esc(item.billing)}<br>` : ''}${item.cost ? `예상 금액 ${esc(item.cost)}<br>` : ''}상태 ${esc(item.status || '해지 예정')}${item.memo ? `<br>${esc(item.memo)}` : ''}</div>
+                  <div class="renewal-meta">${item.status !== '해지 완료' && d !== null && d <= 3 ? `<span class="priority-label red">${esc(urgency)}</span><br>` : `<b>${esc(urgency)}</b><br>`}${esc(dateLabel)}<br>${item.billing ? `결제 예정 ${esc(item.billing)}<br>` : ''}${item.cost ? `예상 금액 ${esc(item.cost)}<br>` : ''}상태 ${esc(item.status || '해지 예정')}${item.memo ? `<br>${esc(item.memo)}` : ''}</div>
                   <div class="renewal-actions">${item.url ? `<button onclick="openRenewalUrl('${esc(item.id)}')">해지 페이지</button>` : ''}<button onclick="editRenewal('${esc(item.id)}')">수정</button><button onclick="completeRenewal('${esc(item.id)}')">해지 완료</button><button class="danger" onclick="deleteRenewal('${esc(item.id)}')">삭제</button></div>
                 </article>`;
             }).join('');
@@ -1510,7 +1597,7 @@
         function deleteGalleryItem(widgetIdx, imgIdx) { widgets[widgetIdx].images.splice(imgIdx, 1); save(); renderWidgets(); }
 
         function exportBackup() {
-            const blob = new Blob([JSON.stringify({ app: 'startpage-vault', v: 4, exportedAt: new Date().toISOString(), widgets, vaultLabels }, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify({ app: 'startpage-vault', v: 5, exportedAt: new Date().toISOString(), widgets, vaultLabels, renewalItems, pointItems }, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = `startpage-backup-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.json`;
@@ -1524,8 +1611,10 @@
                 const parsed = JSON.parse(text);
                 if (parsed && Array.isArray(parsed.widgets)) {
                     widgets = parsed.widgets;
+                    if (Array.isArray(parsed.renewalItems)) { renewalItems = parsed.renewalItems; localStorage.setItem(RENEWAL_KEY, JSON.stringify(renewalItems)); }
+                    if (Array.isArray(parsed.pointItems)) { pointItems = parsed.pointItems; localStorage.setItem(POINT_KEY, JSON.stringify(pointItems)); }
                     if (parsed.vaultLabels && Array.isArray(parsed.vaultLabels.categories) && Array.isArray(parsed.vaultLabels.modes)) { vaultLabels = parsed.vaultLabels; saveVaultLabels(); renderVaultLabels(); }
-                    save(); renderWidgets();
+                    save(); renderWidgets(); renderRenewals(); renderPoints();
                     toast('백업 불러오기 완료');
                 }
             } catch {
@@ -1541,6 +1630,7 @@
                 cloud = cloudApi || null;
                 loadLocal();
             renderRenewals();
+            renderPoints();
             checkRenewalAlerts();
                 if (cloud) {
                     try {
